@@ -58,7 +58,7 @@ app.delete('/webhooks/:id', (req, res) => {
 // Deploy notification
 app.post('/notify/deploy', async (req, res) => {
   const { groupId, commit, branch, actor, status, service } = req.body;
-  if (!groupId) return res.status(400).json({ error: 'groupId obrigatório' });
+  if (!groupId || !groupId.trim()) return res.status(400).json({ error: 'groupId obrigatório' });
 
   const lines = [`🚀 *${service || 'deploy'}* — ${status || 'deploy concluído!'}`];
   if (actor) lines.push(`👤 ${actor}`);

@@ -9,14 +9,17 @@ jobs:
     runs-on: [self-hosted, casaos]
     steps:
       - name: Notify build started
+        env:
+          NOTIFY_GROUP_ID: ${{ secrets.NOTIFY_GROUP_ID }}
         run: |
+          [ -z "$NOTIFY_GROUP_ID" ] && exit 0
           jq -n \
             --arg actor "${{ github.actor }}" \
             --arg branch "${{ github.ref_name }}" \
             --arg commit "$(echo '${{ github.event.head_commit.message }}' | head -1)" \
             --arg status "🏗️ Build iniciado" \
             --arg service "${{ github.event.repository.name }}" \
-            --arg groupId "${{ secrets.NOTIFY_GROUP_ID }}" \
+            --arg groupId "$NOTIFY_GROUP_ID" \
             '{actor: $actor, branch: $branch, commit: $commit, status: $status, service: $service, groupId: $groupId}' | \
           curl -s -X POST http://192.168.0.220:3010/notify/deploy \
             -H "Content-Type: application/json" \
@@ -75,7 +78,10 @@ jobs:
 
       - name: Notify
         if: always()
+        env:
+          NOTIFY_GROUP_ID: ${{ secrets.NOTIFY_GROUP_ID }}
         run: |
+          [ -z "$NOTIFY_GROUP_ID" ] && exit 0
           BUILD="${{ needs.build.result }}"
           DEPLOY="${{ steps.deploy.outcome }}"
 
@@ -94,7 +100,7 @@ jobs:
             --arg commit "$(git log -1 --pretty='%s')" \
             --arg status "$STATUS" \
             --arg service "${{ github.event.repository.name }}" \
-            --arg groupId "${{ secrets.NOTIFY_GROUP_ID }}" \
+            --arg groupId "$NOTIFY_GROUP_ID" \
             '{actor: $actor, branch: $branch, commit: $commit, status: $status, service: $service, groupId: $groupId}' | \
           curl -s -X POST http://192.168.0.220:3010/notify/deploy \
             -H "Content-Type: application/json" \
