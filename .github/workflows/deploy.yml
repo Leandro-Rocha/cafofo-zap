@@ -17,7 +17,7 @@ jobs:
             --arg status "🏗️ Build iniciado" \
             --arg service "${{ github.event.repository.name }}" \
             '{actor: $actor, branch: $branch, commit: $commit, status: $status, service: $service}' | \
-          curl -s -X POST http://192.168.0.220:4001/api/notify/deploy \
+          curl -s -X POST http://192.168.0.220:3010/notify/deploy \
             -H "Content-Type: application/json" \
             -d @- || true
 
@@ -94,6 +94,6 @@ jobs:
             --arg status "$STATUS" \
             --arg service "${{ github.event.repository.name }}" \
             '{actor: $actor, branch: $branch, commit: $commit, status: $status, service: $service}' | \
-          curl -s -X POST http://192.168.0.220:4001/api/notify/deploy \
+          curl -s -X POST http://192.168.0.220:3010/notify/deploy \
             -H "Content-Type: application/json" \
             -d @- || true

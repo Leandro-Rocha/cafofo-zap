@@ -54,6 +54,25 @@ app.delete('/webhooks/:id', (req, res) => {
   res.status(204).end();
 });
 
+// Deploy notification
+app.post('/notify/deploy', async (req, res) => {
+  const groupId = process.env.NOTIFY_GROUP_ID;
+  if (!groupId) return res.status(503).json({ error: 'NOTIFY_GROUP_ID não configurado' });
+
+  const { commit, branch, actor, status, service } = req.body;
+  const lines = [`🚀 *${service || 'deploy'}* — ${status || 'deploy concluído!'}`];
+  if (actor) lines.push(`👤 ${actor}`);
+  if (branch) lines.push(`🌿 ${branch}`);
+  if (commit) lines.push(`📝 ${commit}`);
+
+  try {
+    await wa.sendMessage(groupId, lines.join('\n'));
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(503).json({ error: err.message });
+  }
+});
+
 // Disconnect
 app.post('/disconnect', (req, res) => {
   wa.disconnect();
