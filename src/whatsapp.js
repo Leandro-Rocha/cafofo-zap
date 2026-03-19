@@ -78,7 +78,8 @@ async function connect() {
         msg.message?.extendedTextMessage?.text ||
         null;
 
-      const audioMsg = msg.message?.audioMessage;
+      const audioMsg = msg.message?.audioMessage ||
+        (msg.message?.documentMessage?.mimetype?.startsWith('audio/') ? msg.message.documentMessage : null);
 
       if (!fromMe && textContent) {
         await onMessage({ type: 'text', groupId, sender, text: textContent, fromMe, raw: msg });
