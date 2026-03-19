@@ -16,7 +16,8 @@ jobs:
             --arg commit "$(echo '${{ github.event.head_commit.message }}' | head -1)" \
             --arg status "🏗️ Build iniciado" \
             --arg service "${{ github.event.repository.name }}" \
-            '{actor: $actor, branch: $branch, commit: $commit, status: $status, service: $service}' | \
+            --arg groupId "${{ secrets.NOTIFY_GROUP_ID }}" \
+            '{actor: $actor, branch: $branch, commit: $commit, status: $status, service: $service, groupId: $groupId}' | \
           curl -s -X POST http://192.168.0.220:3010/notify/deploy \
             -H "Content-Type: application/json" \
             -d @- || true
@@ -93,7 +94,8 @@ jobs:
             --arg commit "$(git log -1 --pretty='%s')" \
             --arg status "$STATUS" \
             --arg service "${{ github.event.repository.name }}" \
-            '{actor: $actor, branch: $branch, commit: $commit, status: $status, service: $service}' | \
+            --arg groupId "${{ secrets.NOTIFY_GROUP_ID }}" \
+            '{actor: $actor, branch: $branch, commit: $commit, status: $status, service: $service, groupId: $groupId}' | \
           curl -s -X POST http://192.168.0.220:3010/notify/deploy \
             -H "Content-Type: application/json" \
             -d @- || true

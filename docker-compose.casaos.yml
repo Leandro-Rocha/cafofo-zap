@@ -8,7 +8,6 @@ services:
       - DB_PATH=/data/cafofo-zap.db
       - WA_DATA_DIR=/data
       - GROQ_API_KEY=${GROQ_API_KEY:-}
-      - NOTIFY_GROUP_ID=${NOTIFY_GROUP_ID:-}
     volumes:
       - zap-data:/data
     ports:
