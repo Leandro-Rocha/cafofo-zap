@@ -60,6 +60,7 @@
 
     let groupsCache = [];
     let enabledCache = new Set();
+    let lastStatus = null;
 
     async function refresh() {
       const data = await fetch('/status').then(r => r.json());
@@ -79,8 +80,10 @@
       if (data.status === 'connected') {
         groupsEl.style.display = 'flex';
         atSection.style.display = 'flex';
-        loadGroups();
+        if (lastStatus !== 'connected') loadGroups();
       }
+
+      lastStatus = data.status;
     }
 
     async function loadGroups() {
