@@ -1,0 +1,17 @@
+services:
+  github-runner:
+    image: myoung34/github-runner:latest
+    container_name: cafofo-zap-runner
+    restart: unless-stopped
+    environment:
+      - ACCESS_TOKEN=${RUNNER_TOKEN}
+      - REPO_URL=https://github.com/Leandro-Rocha/cafofo-zap
+      - RUNNER_NAME=casaos
+      - LABELS=casaos
+      - RUNNER_WORKDIR=/tmp/runner
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - runner-data:/tmp/runner
+
+volumes:
+  runner-data:
