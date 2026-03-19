@@ -60,6 +60,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Log in to GHCR
+        if: needs.build.result == 'success'
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
       - name: Deploy
         id: deploy
         if: needs.build.result == 'success'
