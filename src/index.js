@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const wa = require('./whatsapp');
 const webhooks = require('./webhooks');
 const { transcribe } = require('./transcribe');
@@ -80,6 +81,8 @@ app.post('/disconnect', (req, res) => {
 });
 
 app.get('/health', (_, res) => res.json({ ok: true }));
+
+app.get('/', (_, res) => res.sendFile(path.join(__dirname, 'admin.html')));
 
 const PORT = process.env.PORT || 3010;
 app.listen(PORT, () => console.log(`[zap] API na porta ${PORT}`));

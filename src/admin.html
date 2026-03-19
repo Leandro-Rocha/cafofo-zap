@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cafofo Zap</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #111; color: #eee; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; gap: 16px; }
+    h1 { font-size: 1.2rem; opacity: 0.6; }
+    #status { font-size: 1rem; padding: 6px 16px; border-radius: 20px; background: #222; }
+    #status.connected { background: #1a3a1a; color: #4caf50; }
+    #status.connecting { background: #3a2a00; color: #ffc107; }
+    #status.disconnected { background: #3a1a1a; color: #f44336; }
+    #qr-box { background: #fff; padding: 16px; border-radius: 12px; display: none; }
+    #qr-box img { display: block; width: 240px; height: 240px; }
+    #groups { width: 100%; max-width: 400px; display: none; flex-direction: column; gap: 8px; }
+    #groups h2 { font-size: 0.85rem; opacity: 0.5; text-transform: uppercase; letter-spacing: 1px; }
+    .group { background: #1e1e1e; border-radius: 8px; padding: 10px 14px; display: flex; flex-direction: column; gap: 2px; cursor: pointer; }
+    .group:hover { background: #2a2a2a; }
+    .group-name { font-size: 0.95rem; }
+    .group-id { font-size: 0.7rem; opacity: 0.4; font-family: monospace; }
+    #msg { font-size: 0.8rem; opacity: 0.4; }
+  </style>
+</head>
+<body>
+  <h1>Cafofo Zap</h1>
+  <div id="status">carregando...</div>
+  <div id="qr-box"><img id="qr" src="" alt="QR Code"></div>
+  <div id="groups">
+    <h2>Grupos</h2>
+    <div id="groups-list"></div>
+  </div>
+  <div id="msg"></div>
+
+  <script>
+    const statusEl = document.getElementById('status');
+    const qrBox = document.getElementById('qr-box');
+    const qrImg = document.getElementById('qr');
+    const groupsEl = document.getElementById('groups');
+    const groupsList = document.getElementById('groups-list');
+    const msgEl = document.getElementById('msg');
+
+    async function refresh() {
+      const data = await fetch('/status').then(r => r.json());
+
+      statusEl.textContent = data.status;
+      statusEl.className = data.status;
+
+      if (data.qr) {
+        qrImg.src = data.qr;
+        qrBox.style.display = 'block';
+        groupsEl.style.display = 'none';
+      } else {
+        qrBox.style.display = 'none';
+      }
+
+      if (data.status === 'connected') {
+        groupsEl.style.display = 'flex';
+        loadGroups();
+      }
+    }
+
+    async function loadGroups() {
+      const groups = await fetch('/groups').then(r => r.json());
+      groupsList.innerHTML = '';
+      groups.forEach(g => {
+        const el = document.createElement('div');
+        el.className = 'group';
+        el.innerHTML = `<span class="group-name">${g.name}</span><span class="group-id">${g.id}</span>`;
+        el.onclick = () => {
+          navigator.clipboard.writeText(g.id);
+          msgEl.textContent = `✓ copiado: ${g.id}`;
+          setTimeout(() => msgEl.textContent = '', 2000);
+        };
+        groupsList.appendChild(el);
+      });
+    }
+
+    refresh();
+    setInterval(refresh, 3000);
+  </script>
+</body>
+</html>
