@@ -11,18 +11,15 @@ app.use(express.json());
 // --- WhatsApp message handler ---
 
 wa.setMessageHandler(async (event) => {
-  console.log(`[zap] handler type=${event.type} fromMe=${event.fromMe} group=${event.groupId} atEnabled=${autotranscribe.isEnabled(event.groupId)}`);
+  if (event.fromMe) return; // ignora mensagens próprias (texto, etc)
 
-  if (event.type === 'audio' && event.fromMe && autotranscribe.isEnabled(event.groupId)) {
+  if (event.type === 'audio' && autotranscribe.isEnabled(event.groupId)) {
     const text = await transcribe(event.buffer, event.mimetype);
-    console.log(`[zap] auto-transcrição resultado: ${text}`);
     if (text) {
       await wa.sendMessage(event.groupId, `📝 ${text}`);
     }
-    return; // mensagens próprias não vão para webhooks
+    return;
   }
-
-  if (event.fromMe) return; // ignora demais mensagens próprias
 
   if (event.type === 'audio' && process.env.GROQ_API_KEY) {
     event.transcription = await transcribe(event.buffer, event.mimetype);
