@@ -6,7 +6,7 @@
   <title>Cafofo Zap</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: sans-serif; background: #111; color: #eee; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; gap: 16px; }
+    body { font-family: sans-serif; background: #111; color: #eee; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; gap: 16px; padding: 24px; }
     h1 { font-size: 1.2rem; opacity: 0.6; }
     #status { font-size: 1rem; padding: 6px 16px; border-radius: 20px; background: #222; }
     #status.connected { background: #1a3a1a; color: #4caf50; }
@@ -14,12 +14,20 @@
     #status.disconnected { background: #3a1a1a; color: #f44336; }
     #qr-box { background: #fff; padding: 16px; border-radius: 12px; display: none; }
     #qr-box img { display: block; width: 240px; height: 240px; }
-    #groups { width: 100%; max-width: 400px; display: none; flex-direction: column; gap: 8px; }
-    #groups h2 { font-size: 0.85rem; opacity: 0.5; text-transform: uppercase; letter-spacing: 1px; }
-    .group { background: #1e1e1e; border-radius: 8px; padding: 10px 14px; display: flex; flex-direction: column; gap: 2px; cursor: pointer; }
-    .group:hover { background: #2a2a2a; }
-    .group-name { font-size: 0.95rem; }
-    .group-id { font-size: 0.7rem; opacity: 0.4; font-family: monospace; }
+    .section { width: 100%; max-width: 420px; display: none; flex-direction: column; gap: 8px; }
+    .section h2 { font-size: 0.85rem; opacity: 0.5; text-transform: uppercase; letter-spacing: 1px; }
+    .group { background: #1e1e1e; border-radius: 8px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .group-info { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; cursor: pointer; }
+    .group-info:hover .group-name { opacity: 0.8; }
+    .group-name { font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .group-id { font-size: 0.7rem; opacity: 0.4; font-family: monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    /* toggle switch */
+    .toggle { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; inset: 0; background: #333; border-radius: 22px; cursor: pointer; transition: background 0.2s; }
+    .slider:before { content: ''; position: absolute; width: 16px; height: 16px; left: 3px; top: 3px; background: #eee; border-radius: 50%; transition: transform 0.2s; }
+    input:checked + .slider { background: #4caf50; }
+    input:checked + .slider:before { transform: translateX(18px); }
     #msg { font-size: 0.8rem; opacity: 0.4; }
   </style>
 </head>
@@ -27,10 +35,17 @@
   <h1>Cafofo Zap</h1>
   <div id="status">carregando...</div>
   <div id="qr-box"><img id="qr" src="" alt="QR Code"></div>
-  <div id="groups">
+
+  <div id="groups" class="section">
     <h2>Grupos</h2>
     <div id="groups-list"></div>
   </div>
+
+  <div id="autotranscribe-section" class="section">
+    <h2>Auto-transcrição de áudio</h2>
+    <div id="autotranscribe-list"></div>
+  </div>
+
   <div id="msg"></div>
 
   <script>
@@ -39,7 +54,12 @@
     const qrImg = document.getElementById('qr');
     const groupsEl = document.getElementById('groups');
     const groupsList = document.getElementById('groups-list');
+    const atSection = document.getElementById('autotranscribe-section');
+    const atList = document.getElementById('autotranscribe-list');
     const msgEl = document.getElementById('msg');
+
+    let groupsCache = [];
+    let enabledCache = new Set();
 
     async function refresh() {
       const data = await fetch('/status').then(r => r.json());
@@ -51,30 +71,85 @@
         qrImg.src = data.qr;
         qrBox.style.display = 'block';
         groupsEl.style.display = 'none';
+        atSection.style.display = 'none';
       } else {
         qrBox.style.display = 'none';
       }
 
       if (data.status === 'connected') {
         groupsEl.style.display = 'flex';
+        atSection.style.display = 'flex';
         loadGroups();
       }
     }
 
     async function loadGroups() {
-      const groups = await fetch('/groups').then(r => r.json());
+      const [groups, enabled] = await Promise.all([
+        fetch('/groups').then(r => r.json()),
+        fetch('/autotranscribe').then(r => r.json()),
+      ]);
+
+      groupsCache = groups;
+      enabledCache = new Set(enabled);
+
+      renderGroups();
+      renderAutotranscribe();
+    }
+
+    function renderGroups() {
       groupsList.innerHTML = '';
-      groups.forEach(g => {
+      groupsCache.forEach(g => {
         const el = document.createElement('div');
         el.className = 'group';
-        el.innerHTML = `<span class="group-name">${g.name}</span><span class="group-id">${g.id}</span>`;
-        el.onclick = () => {
+        el.innerHTML = `<div class="group-info">
+          <span class="group-name">${g.name}</span>
+          <span class="group-id">${g.id}</span>
+        </div>`;
+        el.querySelector('.group-info').onclick = () => {
           navigator.clipboard.writeText(g.id);
-          msgEl.textContent = `✓ copiado: ${g.id}`;
-          setTimeout(() => msgEl.textContent = '', 2000);
+          flash(`✓ copiado: ${g.id}`);
         };
         groupsList.appendChild(el);
       });
+    }
+
+    function renderAutotranscribe() {
+      atList.innerHTML = '';
+      groupsCache.forEach(g => {
+        const checked = enabledCache.has(g.id);
+        const el = document.createElement('div');
+        el.className = 'group';
+        el.innerHTML = `
+          <div class="group-info">
+            <span class="group-name">${g.name}</span>
+            <span class="group-id">${g.id}</span>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" ${checked ? 'checked' : ''}>
+            <span class="slider"></span>
+          </label>`;
+
+        const checkbox = el.querySelector('input');
+        checkbox.onchange = async () => {
+          const id = encodeURIComponent(g.id);
+          if (checkbox.checked) {
+            await fetch(`/autotranscribe/${id}`, { method: 'POST' });
+            enabledCache.add(g.id);
+            flash(`✓ auto-transcrição ativada: ${g.name}`);
+          } else {
+            await fetch(`/autotranscribe/${id}`, { method: 'DELETE' });
+            enabledCache.delete(g.id);
+            flash(`✗ auto-transcrição desativada: ${g.name}`);
+          }
+        };
+
+        atList.appendChild(el);
+      });
+    }
+
+    function flash(text) {
+      msgEl.textContent = text;
+      setTimeout(() => msgEl.textContent = '', 2500);
     }
 
     refresh();

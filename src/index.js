@@ -3,6 +3,7 @@ const path = require('path');
 const wa = require('./whatsapp');
 const webhooks = require('./webhooks');
 const { transcribe } = require('./transcribe');
+const autotranscribe = require('./autotranscribe');
 
 const app = express();
 app.use(express.json());
@@ -10,6 +11,16 @@ app.use(express.json());
 // --- WhatsApp message handler ---
 
 wa.setMessageHandler(async (event) => {
+  if (event.type === 'audio' && event.fromMe && autotranscribe.isEnabled(event.groupId)) {
+    const text = await transcribe(event.buffer, event.mimetype);
+    if (text) {
+      await wa.sendMessage(event.groupId, `📝 ${text}`);
+    }
+    return; // mensagens próprias não vão para webhooks
+  }
+
+  if (event.fromMe) return; // ignora demais mensagens próprias
+
   if (event.type === 'audio' && process.env.GROQ_API_KEY) {
     event.transcription = await transcribe(event.buffer, event.mimetype);
   }
@@ -71,6 +82,19 @@ app.post('/notify/deploy', async (req, res) => {
   } catch (err) {
     res.status(503).json({ error: err.message });
   }
+});
+
+// Auto-transcrição
+app.get('/autotranscribe', (req, res) => res.json(autotranscribe.list()));
+
+app.post('/autotranscribe/:groupId', (req, res) => {
+  autotranscribe.enable(decodeURIComponent(req.params.groupId));
+  res.json({ ok: true });
+});
+
+app.delete('/autotranscribe/:groupId', (req, res) => {
+  autotranscribe.disable(decodeURIComponent(req.params.groupId));
+  res.json({ ok: true });
 });
 
 // Disconnect

@@ -65,9 +65,12 @@ async function connect() {
     if (type !== 'notify' || !onMessage) return;
 
     for (const msg of messages) {
-      if (msg.key.fromMe) continue;
-
+      const fromMe = !!msg.key.fromMe;
       const groupId = msg.key.remoteJid;
+
+      // só processa grupos
+      if (!groupId || !groupId.endsWith('@g.us')) continue;
+
       const sender = msg.pushName || msg.key.participant || groupId;
 
       const textContent =
@@ -77,15 +80,15 @@ async function connect() {
 
       const audioMsg = msg.message?.audioMessage;
 
-      if (textContent) {
-        await onMessage({ type: 'text', groupId, sender, text: textContent, raw: msg });
+      if (!fromMe && textContent) {
+        await onMessage({ type: 'text', groupId, sender, text: textContent, fromMe, raw: msg });
       } else if (audioMsg) {
         try {
           const buffer = await downloadMediaMessage(msg, 'buffer', {}, {
             logger: pino({ level: 'silent' }),
             reuploadRequest: sock.updateMediaMessage,
           });
-          await onMessage({ type: 'audio', groupId, sender, buffer, mimetype: audioMsg.mimetype, raw: msg });
+          await onMessage({ type: 'audio', groupId, sender, buffer, mimetype: audioMsg.mimetype, fromMe, raw: msg });
         } catch (err) {
           console.error('[zap] erro ao baixar áudio:', err.message);
         }

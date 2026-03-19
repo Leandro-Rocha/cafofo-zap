@@ -14,7 +14,10 @@ db.exec(`
     events TEXT NOT NULL DEFAULT 'text,audio',
     secret TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  )
+  );
+  CREATE TABLE IF NOT EXISTS autotranscribe (
+    group_id TEXT PRIMARY KEY
+  );
 `);
 
 module.exports = db;
