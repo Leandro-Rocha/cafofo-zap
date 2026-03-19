@@ -1,0 +1,17 @@
+services:
+  cafofo-zap:
+    build: .
+    container_name: cafofo-zap
+    restart: unless-stopped
+    environment:
+      - PORT=3010
+      - DB_PATH=/data/cafofo-zap.db
+      - WA_DATA_DIR=/data
+      - GROQ_API_KEY=${GROQ_API_KEY:-}
+    volumes:
+      - zap-data:/data
+    ports:
+      - "3010:3010"
+
+volumes:
+  zap-data:

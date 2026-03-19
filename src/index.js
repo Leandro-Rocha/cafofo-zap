@@ -1,0 +1,66 @@
+const express = require('express');
+const wa = require('./whatsapp');
+const webhooks = require('./webhooks');
+const { transcribe } = require('./transcribe');
+
+const app = express();
+app.use(express.json());
+
+// --- WhatsApp message handler ---
+
+wa.setMessageHandler(async (event) => {
+  if (event.type === 'audio' && process.env.GROQ_API_KEY) {
+    event.transcription = await transcribe(event.buffer, event.mimetype);
+  }
+  await webhooks.dispatch(event);
+});
+
+wa.connect().catch((err) => console.error('[zap] falha ao conectar:', err.message));
+
+// --- Routes ---
+
+// Status & QR
+app.get('/status', (req, res) => res.json(wa.getStatus()));
+
+// Groups
+app.get('/groups', async (req, res) => {
+  res.json(await wa.getGroups());
+});
+
+// Send message
+app.post('/send', async (req, res) => {
+  const { groupId, text } = req.body;
+  if (!groupId || !text) return res.status(400).json({ error: 'groupId e text obrigatórios' });
+  try {
+    await wa.sendMessage(groupId, text);
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(503).json({ error: err.message });
+  }
+});
+
+// Webhooks
+app.get('/webhooks', (req, res) => res.json(webhooks.list()));
+
+app.post('/webhooks', (req, res) => {
+  const { url, groupId, events, secret } = req.body;
+  if (!url) return res.status(400).json({ error: 'url obrigatória' });
+  const hook = webhooks.register({ url, groupId, events, secret });
+  res.status(201).json(hook);
+});
+
+app.delete('/webhooks/:id', (req, res) => {
+  webhooks.remove(req.params.id);
+  res.status(204).end();
+});
+
+// Disconnect
+app.post('/disconnect', (req, res) => {
+  wa.disconnect();
+  res.json({ ok: true });
+});
+
+app.get('/health', (_, res) => res.json({ ok: true }));
+
+const PORT = process.env.PORT || 3010;
+app.listen(PORT, () => console.log(`[zap] API na porta ${PORT}`));
