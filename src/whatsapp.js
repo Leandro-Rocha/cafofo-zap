@@ -71,6 +71,9 @@ async function connect() {
       // só processa grupos
       if (!groupId || !groupId.endsWith('@g.us')) continue;
 
+      const msgTypes = Object.keys(msg.message || {});
+      console.log(`[zap] msg fromMe=${fromMe} group=${groupId} types=${msgTypes.join(',')}`);
+
       const sender = msg.pushName || msg.key.participant || groupId;
 
       const textContent =
@@ -84,6 +87,7 @@ async function connect() {
       if (!fromMe && textContent) {
         await onMessage({ type: 'text', groupId, sender, text: textContent, fromMe, raw: msg });
       } else if (audioMsg) {
+        console.log(`[zap] áudio detectado fromMe=${fromMe} mimetype=${audioMsg.mimetype}`);
         try {
           const buffer = await downloadMediaMessage(msg, 'buffer', {}, {
             logger: pino({ level: 'silent' }),
@@ -93,6 +97,8 @@ async function connect() {
         } catch (err) {
           console.error('[zap] erro ao baixar áudio:', err.message);
         }
+      } else {
+        console.log(`[zap] mensagem ignorada fromMe=${fromMe} types=${msgTypes.join(',')}`);
       }
     }
   });

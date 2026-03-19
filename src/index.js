@@ -11,8 +11,11 @@ app.use(express.json());
 // --- WhatsApp message handler ---
 
 wa.setMessageHandler(async (event) => {
+  console.log(`[zap] handler type=${event.type} fromMe=${event.fromMe} group=${event.groupId} atEnabled=${autotranscribe.isEnabled(event.groupId)}`);
+
   if (event.type === 'audio' && event.fromMe && autotranscribe.isEnabled(event.groupId)) {
     const text = await transcribe(event.buffer, event.mimetype);
+    console.log(`[zap] auto-transcrição resultado: ${text}`);
     if (text) {
       await wa.sendMessage(event.groupId, `📝 ${text}`);
     }
