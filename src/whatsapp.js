@@ -5,6 +5,7 @@ const {
   fetchLatestBaileysVersion,
   Browsers,
   downloadMediaMessage,
+  jidNormalizedUser,
 } = require('@whiskeysockets/baileys');
 const QRCode = require('qrcode');
 const pino = require('pino');
@@ -18,6 +19,7 @@ let sock = null;
 let currentQR = null;
 let status = 'disconnected';
 let onMessage = null;
+let myJid = null;
 
 function setMessageHandler(fn) {
   onMessage = fn;
@@ -89,7 +91,8 @@ async function connect() {
             logger: pino({ level: 'silent' }),
             reuploadRequest: sock.updateMediaMessage,
           });
-          await onMessage({ type: 'audio', groupId, sender, buffer, mimetype: audioMsg.mimetype, fromMe, raw: msg });
+          const senderJid = msg.key.participant ? jidNormalizedUser(msg.key.participant) : null;
+          await onMessage({ type: 'audio', groupId, sender, senderJid, buffer, mimetype: audioMsg.mimetype, fromMe, raw: msg });
         } catch (err) {
           console.error('[zap] erro ao baixar áudio:', err.message);
         }
@@ -106,7 +109,8 @@ async function connect() {
     if (connection === 'open') {
       currentQR = null;
       status = 'connected';
-      console.log('[zap] conectado');
+      myJid = sock.user?.id ? jidNormalizedUser(sock.user.id) : null;
+      console.log('[zap] conectado, myJid:', myJid);
     }
     if (connection === 'close') {
       status = 'disconnected';
@@ -133,4 +137,6 @@ function disconnect() {
   fs.rmSync(AUTH_DIR, { recursive: true, force: true });
 }
 
-module.exports = { connect, getStatus, getGroups, sendMessage, setMessageHandler, disconnect };
+function getMyJid() { return myJid; }
+
+module.exports = { connect, getStatus, getGroups, sendMessage, setMessageHandler, disconnect, getMyJid };

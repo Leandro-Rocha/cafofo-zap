@@ -11,15 +11,18 @@ app.use(express.json());
 // --- WhatsApp message handler ---
 
 wa.setMessageHandler(async (event) => {
-  if (event.fromMe) return; // ignora mensagens próprias (texto, etc)
+  const myJid = wa.getMyJid();
+  const isMe = event.fromMe || (myJid && event.senderJid === myJid);
 
-  if (event.type === 'audio' && autotranscribe.isEnabled(event.groupId)) {
+  if (event.type === 'audio' && isMe && autotranscribe.isEnabled(event.groupId)) {
     const text = await transcribe(event.buffer, event.mimetype);
     if (text) {
       await wa.sendMessage(event.groupId, `📝 ${text}`);
     }
     return;
   }
+
+  if (isMe) return; // ignora demais mensagens próprias
 
   if (event.type === 'audio' && process.env.GROQ_API_KEY) {
     event.transcription = await transcribe(event.buffer, event.mimetype);
