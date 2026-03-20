@@ -13,8 +13,7 @@ app.use(express.json());
 // --- WhatsApp message handler ---
 
 wa.setMessageHandler(async (event) => {
-  const myJid = wa.getMyJid();
-  const isMe = event.fromMe || (myJid && event.senderJid === myJid);
+  const isMe = event.isMySender;
 
   if (event.type === 'audio' && isMe && autotranscribe.isEnabled(event.groupId)) {
     const text = await transcribe(event.buffer, event.mimetype);

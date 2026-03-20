@@ -20,6 +20,7 @@ let currentQR = null;
 let status = 'disconnected';
 let onMessage = null;
 let myJid = null;
+let myLid = null;
 
 function setMessageHandler(fn) {
   onMessage = fn;
@@ -81,11 +82,13 @@ async function connect() {
       const senderJid = msg.key.participant ? jidNormalizedUser(msg.key.participant) : null;
       console.log(`[zap] msg groupId=${groupId} fromMe=${fromMe} hasAudio=${hasAudio} senderJid=${senderJid} myJid=${myJid} type=${type}`);
 
+      const isMySender = fromMe || senderJid === myJid || (myLid && senderJid === myLid);
+      console.log(`[zap] isMySender=${isMySender} fromMe=${fromMe} senderJid=${senderJid} myJid=${myJid} myLid=${myLid}`);
+
       // 'append' só interessa para áudio próprio (auto-transcrição)
-      // fromMe pode vir false no append mesmo sendo mensagem própria — usar myJid como fallback
       if (type === 'append') {
-        if (!hasAudio || !myJid || senderJid !== myJid) {
-          console.log(`[zap] append ignorado: hasAudio=${hasAudio} myJid=${myJid} senderJid=${senderJid}`);
+        if (!hasAudio || !isMySender) {
+          console.log(`[zap] append ignorado: hasAudio=${hasAudio} isMySender=${isMySender}`);
           continue;
         }
       }
@@ -100,16 +103,15 @@ async function connect() {
       const audioMsg = msg.message?.audioMessage ||
         (msg.message?.documentMessage?.mimetype?.startsWith('audio/') ? msg.message.documentMessage : null);
 
-      if (!fromMe && textContent) {
-        await onMessage({ type: 'text', groupId, sender, text: textContent, fromMe, raw: msg });
+      if (!isMySender && textContent) {
+        await onMessage({ type: 'text', groupId, sender, text: textContent, fromMe, isMySender, raw: msg });
       } else if (audioMsg) {
         try {
           const buffer = await downloadMediaMessage(msg, 'buffer', {}, {
             logger: pino({ level: 'silent' }),
             reuploadRequest: sock.updateMediaMessage,
           });
-          const senderJid = msg.key.participant ? jidNormalizedUser(msg.key.participant) : null;
-          await onMessage({ type: 'audio', groupId, sender, senderJid, buffer, mimetype: audioMsg.mimetype, fromMe, raw: msg });
+          await onMessage({ type: 'audio', groupId, sender, senderJid, buffer, mimetype: audioMsg.mimetype, fromMe, isMySender, raw: msg });
         } catch (err) {
           console.error('[zap] erro ao baixar áudio:', err.message);
         }
@@ -127,7 +129,8 @@ async function connect() {
       currentQR = null;
       status = 'connected';
       myJid = sock.user?.id ? jidNormalizedUser(sock.user.id) : null;
-      console.log('[zap] conectado, myJid:', myJid);
+      myLid = sock.user?.lid ? jidNormalizedUser(sock.user.lid) : null;
+      console.log('[zap] conectado, myJid:', myJid, 'myLid:', myLid);
     }
     if (connection === 'close') {
       status = 'disconnected';
