@@ -19,7 +19,8 @@ wa.setMessageHandler(async (event) => {
   if (event.type === 'audio' && isMe && autotranscribe.isEnabled(event.groupId)) {
     const text = await transcribe(event.buffer, event.mimetype).catch((err) => { console.error('[transcribe] erro:', err.message); return null; });
     if (text) {
-      await wa.sendMessage(event.groupId, `*${event.sender}:*\n${text}`);
+      const msg = event.forwarded ? text : `*${event.sender}:*\n${text}`;
+      await wa.sendMessage(event.groupId, msg);
     }
     return;
   }

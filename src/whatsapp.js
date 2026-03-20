@@ -97,6 +97,8 @@ async function connect() {
       const audioMsg = msg.message?.audioMessage ||
         (msg.message?.documentMessage?.mimetype?.startsWith('audio/') ? msg.message.documentMessage : null);
 
+      const forwarded = (audioMsg?.contextInfo?.forwardingScore ?? 0) > 0;
+
       if (!isMySender && textContent) {
         await onMessage({ type: 'text', groupId, sender, text: textContent, fromMe, isMySender, raw: msg });
       } else if (audioMsg) {
@@ -105,7 +107,7 @@ async function connect() {
             logger: pino({ level: 'silent' }),
             reuploadRequest: sock.updateMediaMessage,
           });
-          await onMessage({ type: 'audio', groupId, sender, senderJid, buffer, mimetype: audioMsg.mimetype, fromMe, isMySender, raw: msg });
+          await onMessage({ type: 'audio', groupId, sender, senderJid, buffer, mimetype: audioMsg.mimetype, fromMe, isMySender, forwarded, raw: msg });
         } catch (err) {
           console.error('[zap] erro ao baixar áudio:', err.message);
         }
