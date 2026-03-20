@@ -6,300 +6,357 @@
   <title>Cafofo Zap</title>
   <style>
     :root {
-      --green: #16a34a;
-      --green-light: #dcfce7;
-      --green-dark: #15803d;
-      --red: #dc2626;
-      --red-light: #fee2e2;
-      --amber: #d97706;
-      --amber-light: #fef3c7;
-      --bg: #f1f5f9;
-      --surface: #ffffff;
-      --border: #e2e8f0;
-      --text: #0f172a;
-      --muted: #94a3b8;
-      --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
-      --shadow-md: 0 4px 16px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
-      --radius: 14px;
-      --radius-sm: 8px;
+      --bg:       #F5F3EF;
+      --surface:  #FFFFFF;
+      --surface2: #FAF9F7;
+      --border:   #E6E1D8;
+      --text:     #1A1410;
+      --text2:    #6B5E52;
+      --muted:    #ADA090;
+      --green:    #1B5E3A;
+      --green2:   #217A4A;
+      --green-bg: #E6F2EB;
+      --amber:    #904A07;
+      --amber-bg: #FDF0DF;
+      --red:      #991818;
+      --red-bg:   #FEECEC;
+      --r:        13px;
+      --r-sm:     8px;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-    html { font-size: 16px; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    #app { max-width: 480px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; }
+    body {
+      font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
 
-    /* ── Header ── */
+    #app {
+      max-width: 460px;
+      margin: 0 auto;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ─── HEADER ─── */
     header {
+      height: 52px;
       background: var(--surface);
       border-bottom: 1px solid var(--border);
-      padding: 0 20px;
-      height: 58px;
       display: flex;
       align-items: center;
-      gap: 12px;
+      padding: 0 16px;
+      gap: 10px;
       position: sticky;
       top: 0;
-      z-index: 20;
+      z-index: 30;
     }
-    .logo { display: flex; align-items: center; gap: 8px; flex: 1; }
-    .logo-icon { width: 30px; height: 30px; background: var(--green); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
-    .logo-icon svg { width: 18px; height: 18px; fill: white; }
-    .logo-name { font-size: 0.95rem; font-weight: 700; letter-spacing: -.3px; }
 
-    .badge {
-      font-size: 0.72rem;
-      font-weight: 600;
-      padding: 3px 10px;
+    .logo-mark {
+      width: 28px; height: 28px;
+      background: var(--green);
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .logo-mark svg { width: 15px; height: 15px; fill: #fff; }
+
+    .logo-text {
+      font-size: 13px; font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      flex: 1;
+    }
+
+    .conn-pill {
+      display: flex; align-items: center; gap: 5px;
+      padding: 3px 9px;
       border-radius: 20px;
-      letter-spacing: .2px;
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 0.03em;
       transition: all .3s;
     }
-    .badge.connected { background: var(--green-light); color: var(--green-dark); }
-    .badge.connecting { background: var(--amber-light); color: var(--amber); animation: pulse 1.5s infinite; }
-    .badge.disconnected { background: var(--red-light); color: var(--red); }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }
+    .conn-pill .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      transition: background .3s;
+    }
+    .conn-pill.connected  { background: var(--green-bg); color: var(--green); }
+    .conn-pill.connected .dot { background: var(--green2); }
+    .conn-pill.connecting { background: var(--amber-bg); color: var(--amber); }
+    .conn-pill.connecting .dot { background: #D97706; animation: blink 1.2s ease-in-out infinite; }
+    .conn-pill.disconnected { background: var(--red-bg); color: var(--red); }
+    .conn-pill.disconnected .dot { background: var(--red); }
 
-    /* ── Tabs ── */
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+    /* ─── TABS ─── */
     nav {
       background: var(--surface);
       border-bottom: 1px solid var(--border);
       display: flex;
       position: sticky;
-      top: 58px;
-      z-index: 19;
+      top: 52px;
+      z-index: 29;
+      padding: 0 12px;
     }
     .tab {
-      flex: 1;
-      background: none;
-      border: none;
+      background: none; border: none;
       border-bottom: 2px solid transparent;
-      padding: 13px 0;
-      font-size: 0.82rem;
-      font-weight: 500;
+      padding: 11px 12px 9px;
+      font-size: 11.5px; font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
       color: var(--muted);
       cursor: pointer;
       transition: color .15s, border-color .15s;
     }
     .tab.active { color: var(--green); border-bottom-color: var(--green); }
-    .tab:hover:not(.active) { color: var(--text); }
+    .tab:hover:not(.active) { color: var(--text2); }
 
-    /* ── Content ── */
-    main { flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-    .page { display: none; flex-direction: column; gap: 12px; }
+    /* ─── MAIN ─── */
+    main { flex: 1; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+    .page { display: none; flex-direction: column; gap: 10px; animation: fadeUp .15s ease; }
     .page.active { display: flex; }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:translateY(0) } }
 
-    /* ── Cards ── */
-    .card { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
-
-    .card-header {
-      padding: 14px 16px 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      border-bottom: 1px solid #f8fafc;
+    /* ─── STATUS CARD ─── */
+    #status-card {
+      border-radius: var(--r);
+      overflow: hidden;
+      transition: background .5s, border .5s, box-shadow .5s;
     }
-    .card-header-icon { width: 28px; height: 28px; border-radius: 7px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .card-header-icon svg { width: 15px; height: 15px; }
-    .card-header-icon.green { background: var(--green-light); }
-    .card-header-icon.green svg { fill: var(--green); }
-    .card-header-icon.blue { background: #dbeafe; }
-    .card-header-icon.blue svg { fill: #1d4ed8; }
-    .card-header-icon.purple { background: #ede9fe; }
-    .card-header-icon.purple svg { fill: #7c3aed; }
-    .card-header-icon.amber { background: var(--amber-light); }
-    .card-header-icon.amber svg { fill: var(--amber); }
-    .card-title { font-size: 0.82rem; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: .5px; }
+    #status-card.connected {
+      background: linear-gradient(150deg, #1B5E3A 0%, #0F3B22 100%);
+      box-shadow: 0 4px 20px rgba(27,94,58,.25);
+    }
+    #status-card.connecting, #status-card.disconnected {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 4px rgba(0,0,0,.05);
+    }
 
-    .card-empty { padding: 24px 16px; text-align: center; color: var(--muted); font-size: 0.84rem; }
+    #status-face {
+      padding: 30px 20px 24px;
+      display: flex; flex-direction: column;
+      align-items: center; gap: 10px;
+    }
 
-    /* ── Rows ── */
+    .s-icon {
+      width: 54px; height: 54px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .s-icon svg { width: 26px; height: 26px; }
+    .s-icon.connected { background: rgba(255,255,255,.15); }
+    .s-icon.connected svg { fill: #fff; }
+    .s-icon.connecting { background: var(--amber-bg); }
+    .s-icon.connecting svg { fill: var(--amber); animation: spin 1.4s linear infinite; }
+    .s-icon.disconnected { background: var(--red-bg); }
+    .s-icon.disconnected svg { fill: var(--red); }
+    @keyframes spin { to { transform: rotate(360deg) } }
+
+    .s-heading { font-size: 16px; font-weight: 600; }
+    .s-heading.connected { color: #fff; }
+    .s-heading.connecting { color: var(--amber); }
+    .s-heading.disconnected { color: var(--text); }
+
+    .s-sub { font-size: 12px; }
+    .s-sub.connected { color: rgba(255,255,255,.55); }
+    .s-sub.connecting { color: var(--text2); }
+    .s-sub.disconnected { color: var(--muted); }
+
+    #qr-wrap {
+      display: none; flex-direction: column; align-items: center;
+      gap: 14px; padding: 0 24px 28px;
+    }
+    #qr-wrap img {
+      width: 188px; height: 188px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      padding: 6px; background: #fff;
+    }
+    #qr-wrap p { font-size: 11.5px; color: var(--text2); text-align: center; line-height: 1.65; }
+
+    /* ─── CARDS ─── */
+    .card {
+      background: var(--surface);
+      border-radius: var(--r);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .card-head {
+      display: flex; align-items: center; gap: 8px;
+      padding: 11px 14px 9px;
+      border-bottom: 1px solid #F2EEE8;
+    }
+    .ci {
+      width: 24px; height: 24px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .ci svg { width: 13px; height: 13px; }
+    .ci-g { background: var(--green-bg); } .ci-g svg { fill: var(--green); }
+    .ci-b { background: #DBEAFE; } .ci-b svg { fill: #1D4ED8; }
+    .ci-p { background: #EDE9FE; } .ci-p svg { fill: #6D28D9; }
+    .ci-a { background: var(--amber-bg); } .ci-a svg { fill: var(--amber); }
+    .card-title { font-size: 11.5px; font-weight: 600; color: var(--text2); letter-spacing: 0.03em; }
+
+    .card-empty { padding: 22px 14px; text-align: center; color: var(--muted); font-size: 13px; }
+
+    /* ─── ROWS ─── */
     .row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 16px;
-      border-bottom: 1px solid #f8fafc;
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px;
+      border-bottom: 1px solid #F2EEE8;
       transition: background .1s;
     }
     .row:last-child { border-bottom: none; }
+    .row:hover { background: var(--surface2); }
 
     .avatar {
-      width: 36px; height: 36px;
-      border-radius: 50%;
+      width: 33px; height: 33px;
+      border-radius: 8px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 0.8rem; font-weight: 700;
-      color: white;
-      flex-shrink: 0;
+      font-size: 11px; font-weight: 800;
+      color: #fff; flex-shrink: 0;
+      letter-spacing: .01em;
     }
 
     .row-info { flex: 1; min-width: 0; }
-    .row-name { font-size: 0.88rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .row-sub { font-size: 0.72rem; color: var(--muted); font-family: 'SF Mono', 'Fira Code', monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+    .row-name { font-size: 13.5px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .row-sub { font-size: 10px; color: var(--muted); font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
 
-    /* ── Toggle ── */
-    .toggle { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
-    .toggle input { opacity: 0; width: 0; height: 0; }
+    /* ─── TOGGLE ─── */
+    .toggle { position: relative; width: 42px; height: 23px; flex-shrink: 0; }
+    .toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
     .slider {
       position: absolute; inset: 0;
-      background: #d1d5db;
-      border-radius: 24px;
-      cursor: pointer;
+      background: #DDD7CC; border-radius: 23px; cursor: pointer;
       transition: background .2s;
     }
-    .slider:before {
-      content: '';
-      position: absolute;
-      width: 18px; height: 18px;
-      left: 3px; top: 3px;
-      background: white;
-      border-radius: 50%;
-      transition: transform .2s cubic-bezier(.34,1.56,.64,1);
-      box-shadow: 0 1px 3px rgba(0,0,0,.15);
+    .slider::before {
+      content: ''; position: absolute;
+      width: 17px; height: 17px; left: 3px; top: 3px;
+      background: #fff; border-radius: 50%;
+      transition: transform .22s cubic-bezier(.34,1.56,.64,1);
+      box-shadow: 0 1px 3px rgba(0,0,0,.18);
     }
-    input:checked + .slider { background: var(--green); }
-    input:checked + .slider:before { transform: translateX(20px); }
+    input:checked + .slider { background: var(--green2); }
+    input:checked + .slider::before { transform: translateX(19px); }
 
-    /* ── Form elements ── */
-    .form-row { padding: 12px 16px; display: flex; gap: 8px; align-items: center; }
+    /* ─── FORM ─── */
+    .form-area { padding: 11px 14px; display: flex; gap: 8px; align-items: center; }
+
     input[type=text], input[type=password], select {
-      background: #f8fafc;
+      background: var(--bg);
       border: 1.5px solid var(--border);
       color: var(--text);
-      padding: 8px 12px;
-      border-radius: var(--radius-sm);
-      font-size: 0.85rem;
-      outline: none;
-      transition: border-color .15s, box-shadow .15s;
+      padding: 7px 10px;
+      border-radius: var(--r-sm);
+      font-size: 13px; outline: none;
+      transition: border-color .15s, box-shadow .15s, background .15s;
       font-family: inherit;
+      -webkit-appearance: none; appearance: none;
+    }
+    select {
+      flex: 1; cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='6' viewBox='0 0 11 6'%3E%3Cpath d='M1 1l4.5 4L10 1' stroke='%23ADA090' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      padding-right: 28px;
     }
     input:focus, select:focus {
       border-color: var(--green);
-      box-shadow: 0 0 0 3px rgba(22,163,74,.1);
+      box-shadow: 0 0 0 3px rgba(27,94,58,.1);
+      background: #fff;
     }
-    select { flex: 1; cursor: pointer; }
-    select option { background: white; }
 
-    /* ── Buttons ── */
+    /* ─── BUTTON ─── */
     .btn {
-      border: none;
-      padding: 8px 16px;
-      border-radius: var(--radius-sm);
-      font-size: 0.84rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: transform .1s, box-shadow .1s, opacity .15s;
-      white-space: nowrap;
-      font-family: inherit;
+      border: none; border-radius: var(--r-sm);
+      padding: 7px 15px;
+      font-size: 12.5px; font-weight: 600;
+      cursor: pointer; white-space: nowrap;
+      font-family: inherit; letter-spacing: .01em;
+      transition: transform .1s, filter .1s;
     }
     .btn:active { transform: scale(.97); }
-    .btn-primary { background: var(--green); color: white; box-shadow: 0 1px 3px rgba(22,163,74,.3); }
-    .btn-primary:hover { background: var(--green-dark); }
-    .btn-ghost { background: #f1f5f9; color: #475569; }
-    .btn-ghost:hover { background: #e2e8f0; }
+    .btn-primary { background: var(--green); color: #fff; }
+    .btn-primary:hover { filter: brightness(1.12); }
 
-    /* ── Status page ── */
-    .status-hero {
-      padding: 32px 16px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
+    /* ─── INFO STRIP ─── */
+    .info-strip {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 8px 14px;
+      background: var(--surface2);
+      border-top: 1px solid #F0EBE2;
+      font-size: 11.5px;
     }
-    .status-orb {
-      width: 72px; height: 72px;
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      transition: all .3s;
-    }
-    .status-orb.connected { background: var(--green-light); }
-    .status-orb.connecting { background: var(--amber-light); animation: pulse 1.5s infinite; }
-    .status-orb.disconnected { background: var(--red-light); }
-    .status-orb svg { width: 32px; height: 32px; }
-    .status-orb.connected svg { fill: var(--green); }
-    .status-orb.connecting svg { fill: var(--amber); }
-    .status-orb.disconnected svg { fill: var(--red); }
-    .status-label { font-size: 1rem; font-weight: 600; }
-    .status-label.connected { color: var(--green-dark); }
-    .status-label.connecting { color: var(--amber); }
-    .status-label.disconnected { color: var(--red); }
+    .info-strip .label { color: var(--muted); }
+    .info-strip .value { color: var(--text); font-weight: 500; }
 
-    #qr-wrap {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-      padding: 0 16px 24px;
-    }
-    #qr-wrap p { font-size: 0.82rem; color: var(--muted); text-align: center; }
-    #qr-wrap img {
-      width: 200px; height: 200px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      padding: 8px;
-      background: white;
-    }
+    /* ─── HINT ─── */
+    .hint { padding: 8px 14px; font-size: 11px; color: var(--muted); border-top: 1px solid #F0EBE2; line-height: 1.6; }
 
-    /* ── Inbox current ── */
-    .info-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; font-size: 0.83rem; color: var(--muted); border-top: 1px solid #f8fafc; }
-    .info-row strong { color: var(--text); font-weight: 500; }
-
-    /* ── Toast ── */
-    #toast {
-      position: fixed;
-      bottom: 28px;
-      left: 50%;
-      transform: translateX(-50%) translateY(12px);
-      background: #0f172a;
-      color: white;
-      padding: 9px 20px;
-      border-radius: 24px;
-      font-size: 0.82rem;
-      font-weight: 500;
-      opacity: 0;
-      transition: opacity .2s, transform .2s;
-      pointer-events: none;
-      white-space: nowrap;
-      box-shadow: 0 4px 16px rgba(0,0,0,.2);
-      z-index: 100;
+    /* ─── STATUS ROW (groq) ─── */
+    .status-row {
+      display: flex; align-items: center; gap: 6px;
+      padding: 9px 14px;
+      border-top: 1px solid #F0EBE2;
+      background: var(--surface2);
+      font-size: 12px;
     }
-    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .pip { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .pip-ok { background: var(--green2); }
+    .pip-err { background: var(--red); }
+    .status-row span { color: var(--muted); }
+    .status-row strong { color: var(--text); font-weight: 500; margin-left: 2px; }
 
-    /* ── Link row ── */
-    .link-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 14px 16px;
-      font-size: 0.88rem;
-      font-weight: 500;
-      color: var(--text);
-      text-decoration: none;
-      border-bottom: 1px solid #f8fafc;
+    /* ─── LINK ROW ─── */
+    a.link-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 13px 14px;
+      font-size: 13.5px; font-weight: 500;
+      color: var(--text); text-decoration: none;
       transition: background .1s;
     }
-    .link-row:last-child { border-bottom: none; }
-    .link-row:hover { background: #f8fafc; }
-    .link-row .arrow { color: var(--muted); font-size: 1rem; }
+    a.link-row:hover { background: var(--surface2); }
+    .chevron { color: var(--muted); font-size: 18px; line-height: 1; }
 
-    /* ── Key status dot ── */
-    .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-    .dot.ok { background: var(--green); }
-    .dot.missing { background: var(--red); }
+    /* ─── TOAST ─── */
+    #toast {
+      position: fixed; bottom: 22px; left: 50%;
+      transform: translateX(-50%) translateY(8px);
+      background: rgba(26,20,16,.9);
+      backdrop-filter: blur(10px);
+      color: #fff;
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-size: 12.5px; font-weight: 500;
+      opacity: 0; pointer-events: none;
+      transition: opacity .2s, transform .2s;
+      white-space: nowrap; z-index: 99;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
   </style>
 </head>
 <body>
 <div id="app">
 
   <header>
-    <div class="logo">
-      <div class="logo-icon">
-        <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.122.554 4.11 1.523 5.832L.044 23.5l5.834-1.53A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.006-1.366l-.36-.213-3.714.975.99-3.623-.234-.374A9.818 9.818 0 012.182 12C2.182 6.578 6.578 2.182 12 2.182S21.818 6.578 21.818 12 17.422 21.818 12 21.818z"/></svg>
-      </div>
-      <span class="logo-name">Cafofo Zap</span>
+    <div class="logo-mark">
+      <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.122.554 4.11 1.523 5.832L.044 23.5l5.834-1.53A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.006-1.366l-.36-.213-3.714.975.99-3.623-.234-.374A9.818 9.818 0 012.182 12C2.182 6.578 6.578 2.182 12 2.182S21.818 6.578 21.818 12 17.422 21.818 12 21.818z"/></svg>
     </div>
-    <span class="badge" id="wa-badge">—</span>
+    <span class="logo-text">Cafofo Zap</span>
+    <div class="conn-pill disconnected" id="conn-pill">
+      <div class="dot"></div>
+      <span id="conn-label">—</span>
+    </div>
   </header>
 
   <nav>
@@ -310,58 +367,51 @@
 
   <main>
 
-    <!-- Status -->
+    <!-- ── STATUS ── -->
     <div class="page active" id="page-status">
-      <div class="card">
-        <div class="status-hero">
-          <div class="status-orb disconnected" id="status-orb">
-            <svg id="status-icon" viewBox="0 0 24 24"></svg>
-          </div>
-          <span class="status-label disconnected" id="status-label">desconectado</span>
-        </div>
+      <div id="status-card" class="disconnected">
+        <div id="status-face"></div>
         <div id="qr-wrap">
           <img id="qr" src="" alt="QR Code">
-          <p>Escaneie com o WhatsApp para conectar</p>
+          <p>Abra o WhatsApp → Menu → Dispositivos vinculados → Vincular dispositivo</p>
         </div>
       </div>
     </div>
 
-    <!-- Transcrições -->
+    <!-- ── TRANSCRIÇÕES ── -->
     <div class="page" id="page-transcricoes">
 
       <div class="card">
-        <div class="card-header">
-          <div class="card-header-icon green">
+        <div class="card-head">
+          <div class="ci ci-g">
             <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
           </div>
           <span class="card-title">Destino das transcrições</span>
         </div>
-        <div class="form-row">
+        <div class="form-area">
           <select id="inbox-select"><option value="">— escolha um grupo —</option></select>
           <button class="btn btn-primary" id="inbox-save">Salvar</button>
         </div>
-        <div class="info-row">
-          <span>Atual</span>
-          <strong id="inbox-current">não configurado</strong>
+        <div class="info-strip">
+          <span class="label">Atual</span>
+          <span class="value" id="inbox-current">não configurado</span>
         </div>
       </div>
 
       <div class="card">
-        <div class="card-header">
-          <div class="card-header-icon blue">
+        <div class="card-head">
+          <div class="ci ci-b">
             <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
           </div>
           <span class="card-title">Remetentes monitorados</span>
         </div>
         <div id="senders-list"></div>
-        <div style="padding:10px 16px;font-size:0.75rem;color:var(--muted);border-top:1px solid #f8fafc">
-          Aparecem automaticamente conforme enviam mensagens nos grupos.
-        </div>
+        <div class="hint">Aparecem automaticamente conforme enviam mensagens nos grupos.</div>
       </div>
 
       <div class="card">
-        <div class="card-header">
-          <div class="card-header-icon purple">
+        <div class="card-head">
+          <div class="ci ci-p">
             <svg viewBox="0 0 24 24"><path d="M21 3L3 10.53v.98l6.84 2.65L12.48 21h.98L21 3z"/></svg>
           </div>
           <span class="card-title">Encaminhar para transcrever</span>
@@ -371,39 +421,37 @@
 
     </div>
 
-    <!-- Ajustes -->
+    <!-- ── AJUSTES ── -->
     <div class="page" id="page-config">
 
       <div class="card">
-        <div class="card-header">
-          <div class="card-header-icon amber">
+        <div class="card-head">
+          <div class="ci ci-a">
             <svg viewBox="0 0 24 24"><path d="M12.65 10C11.83 7.67 9.61 6 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.61 0 4.83-1.67 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg>
           </div>
           <span class="card-title">Groq API Key</span>
         </div>
-        <div class="form-row">
+        <div class="form-area">
           <input type="password" id="groq-input" placeholder="gsk_..." style="flex:1">
           <button class="btn btn-primary" id="groq-save">Salvar</button>
         </div>
-        <div class="info-row">
+        <div class="status-row">
+          <div class="pip pip-err" id="groq-pip"></div>
           <span>Status</span>
-          <div style="display:flex;align-items:center;gap:6px">
-            <div class="dot missing" id="groq-dot"></div>
-            <strong id="groq-status">Não configurada</strong>
-          </div>
+          <strong id="groq-status">Não configurada</strong>
         </div>
       </div>
 
       <div class="card">
-        <div class="card-header">
-          <div class="card-header-icon green">
-            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14H7v-2h5v2zm5-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+        <div class="card-head">
+          <div class="ci ci-g">
+            <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>
           </div>
           <span class="card-title">Ferramentas</span>
         </div>
         <a href="/logs" class="link-row">
-          <span>Logs em tempo real</span>
-          <span class="arrow">›</span>
+          Logs em tempo real
+          <span class="chevron">›</span>
         </a>
       </div>
 
@@ -416,11 +464,14 @@
 
 <script>
   // ── Icons ──
-  const ICONS = {
-    connected: 'M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z',
-    connecting: 'M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z',
-    disconnected: 'M19.59 7L12 14.59 6.41 9H11V7H3v8h2v-4.59l7 7 9-9z',
+  const IC = {
+    check:  'M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z',
+    spin:   'M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z',
+    disc:   'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z',
   };
+
+  const STATUS_LABELS = { connected: 'Conectado', connecting: 'Conectando', disconnected: 'Desconectado' };
+  const STATUS_SUBS   = { connected: 'WhatsApp ativo e funcionando', connecting: 'Aguardando QR Code…', disconnected: 'Sem conexão com o WhatsApp' };
 
   // ── Nav ──
   document.querySelectorAll('.tab').forEach(btn => {
@@ -432,16 +483,14 @@
     };
   });
 
-  // ── Avatar colors ──
+  // ── Avatar ──
+  const PALETTE = ['#2563EB','#7C3AED','#DB2777','#D97706','#0891B2','#059669','#EA580C','#4F46E5','#0D9488','#DC2626'];
   function avatarColor(name) {
-    const palette = ['#3b82f6','#8b5cf6','#ec4899','#f59e0b','#06b6d4','#10b981','#f97316','#6366f1','#14b8a6','#ef4444'];
-    let h = 0;
-    for (const c of name) h = (h * 31 + c.charCodeAt(0)) >>> 0;
-    return palette[h % palette.length];
+    let h = 0; for (const c of name) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+    return PALETTE[h % PALETTE.length];
   }
-
   function initials(name) {
-    return name.split(/\s+/).slice(0, 2).map(w => w[0] || '').join('').toUpperCase() || '?';
+    return name.split(/\s+/).slice(0,2).map(w => w[0]||'').join('').toUpperCase() || '?';
   }
 
   // ── State ──
@@ -449,19 +498,23 @@
 
   // ── Status ──
   async function refresh() {
-    const data = await fetch('/status').then(r => r.json()).catch(() => ({ status: 'disconnected' }));
+    const data = await fetch('/status').then(r=>r.json()).catch(()=>({ status:'disconnected' }));
     const s = data.status;
 
-    document.getElementById('wa-badge').textContent = { connected: 'Conectado', connecting: 'Conectando', disconnected: 'Desconectado' }[s] || s;
-    document.getElementById('wa-badge').className = 'badge ' + s;
+    // Header pill
+    const pill = document.getElementById('conn-pill');
+    pill.className = 'conn-pill ' + s;
+    document.getElementById('conn-label').textContent = STATUS_LABELS[s] || s;
 
-    const orb = document.getElementById('status-orb');
-    const lbl = document.getElementById('status-label');
-    const icon = document.getElementById('status-icon');
-    orb.className = 'status-orb ' + s;
-    lbl.className = 'status-label ' + s;
-    lbl.textContent = { connected: 'Conectado', connecting: 'Aguardando QR…', disconnected: 'Desconectado' }[s] || s;
-    icon.innerHTML = `<path d="${ICONS[s] || ICONS.disconnected}"/>`;
+    // Status card
+    const card = document.getElementById('status-card');
+    card.className = s;
+
+    const face = document.getElementById('status-face');
+    face.innerHTML = `
+      <div class="s-icon ${s}"><svg viewBox="0 0 24 24"><path d="${s==='connected'?IC.check:s==='connecting'?IC.spin:IC.disc}"/></svg></div>
+      <div class="s-heading ${s}">${STATUS_LABELS[s]||s}</div>
+      <div class="s-sub ${s}">${STATUS_SUBS[s]||''}</div>`;
 
     const qrWrap = document.getElementById('qr-wrap');
     if (data.qr) {
@@ -478,8 +531,8 @@
   // ── Groups ──
   async function loadGroups() {
     const [groups, enabled] = await Promise.all([
-      fetch('/groups').then(r => r.json()),
-      fetch('/autotranscribe').then(r => r.json()),
+      fetch('/groups').then(r=>r.json()),
+      fetch('/autotranscribe').then(r=>r.json()),
     ]);
     groupsCache = groups;
     enabledCache = new Set(enabled);
@@ -496,15 +549,14 @@
     groupsCache.forEach(g => {
       const row = document.createElement('div');
       row.className = 'row';
-      const color = avatarColor(g.name);
       row.innerHTML = `
-        <div class="avatar" style="background:${color}">${initials(g.name)}</div>
+        <div class="avatar" style="background:${avatarColor(g.name)}">${initials(g.name)}</div>
         <div class="row-info"><div class="row-name">${g.name}</div></div>
-        <label class="toggle"><input type="checkbox" ${enabledCache.has(g.id) ? 'checked' : ''}><span class="slider"></span></label>`;
-      row.querySelector('input').onchange = async (e) => {
+        <label class="toggle"><input type="checkbox" ${enabledCache.has(g.id)?'checked':''}><span class="slider"></span></label>`;
+      row.querySelector('input').onchange = async e => {
         const id = encodeURIComponent(g.id);
-        if (e.target.checked) { await fetch(`/autotranscribe/${id}`, { method: 'POST' }); enabledCache.add(g.id); toast('Ativado: ' + g.name); }
-        else { await fetch(`/autotranscribe/${id}`, { method: 'DELETE' }); enabledCache.delete(g.id); toast('Desativado: ' + g.name); }
+        if (e.target.checked) { await fetch(`/autotranscribe/${id}`,{method:'POST'}); enabledCache.add(g.id); toast('Ativado: '+g.name); }
+        else { await fetch(`/autotranscribe/${id}`,{method:'DELETE'}); enabledCache.delete(g.id); toast('Desativado: '+g.name); }
       };
       el.appendChild(row);
     });
@@ -514,47 +566,43 @@
   async function renderInboxSelect() {
     const sel = document.getElementById('inbox-select');
     const cur = document.getElementById('inbox-current');
-    const { jid } = await fetch('/config/inbox').then(r => r.json());
+    const { jid } = await fetch('/config/inbox').then(r=>r.json());
     sel.innerHTML = '<option value="">— escolha um grupo —</option>';
-    groupsCache.forEach(g => {
-      const o = new Option(g.name, g.id, false, g.id === jid);
-      sel.appendChild(o);
-    });
-    const found = groupsCache.find(g => g.id === jid);
+    groupsCache.forEach(g => sel.appendChild(new Option(g.name, g.id, false, g.id===jid)));
+    const found = groupsCache.find(g=>g.id===jid);
     cur.textContent = found ? found.name : (jid || 'não configurado');
   }
 
   document.getElementById('inbox-save').onclick = async () => {
     const jid = document.getElementById('inbox-select').value;
-    await fetch('/config/inbox', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ jid }) });
+    await fetch('/config/inbox',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jid})});
     await renderInboxSelect();
     toast(jid ? 'Destino salvo' : 'Destino removido');
   };
 
   // ── Senders ──
   async function renderSenders() {
-    const list = await fetch('/senders').then(r => r.json());
+    const list = await fetch('/senders').then(r=>r.json());
     const el = document.getElementById('senders-list');
     el.innerHTML = '';
     if (!list.length) { el.innerHTML = '<div class="card-empty">Nenhuma mensagem recebida ainda</div>'; return; }
     list.forEach(s => {
       const row = document.createElement('div');
       row.className = 'row';
-      const color = avatarColor(s.name);
       row.innerHTML = `
-        <div class="avatar" style="background:${color}">${initials(s.name)}</div>
+        <div class="avatar" style="background:${avatarColor(s.name)}">${initials(s.name)}</div>
         <div class="row-info">
           <div class="row-name">${s.name}</div>
           <div class="row-sub">${s.jid}</div>
         </div>
-        <label class="toggle"><input type="checkbox" ${s.monitored ? 'checked' : ''}><span class="slider"></span></label>`;
-      row.querySelector('input').onchange = async (e) => {
+        <label class="toggle"><input type="checkbox" ${s.monitored?'checked':''}><span class="slider"></span></label>`;
+      row.querySelector('input').onchange = async e => {
         if (e.target.checked) {
-          await fetch('/senders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ jid: s.jid, name: s.name }) });
-          toast('Monitorando: ' + s.name);
+          await fetch('/senders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jid:s.jid,name:s.name})});
+          toast('Monitorando: '+s.name);
         } else {
-          await fetch(`/senders/${encodeURIComponent(s.jid)}`, { method: 'DELETE' });
-          toast('Removido: ' + s.name);
+          await fetch(`/senders/${encodeURIComponent(s.jid)}`,{method:'DELETE'});
+          toast('Removido: '+s.name);
         }
       };
       el.appendChild(row);
@@ -563,14 +611,14 @@
 
   // ── Groq ──
   async function loadGroqStatus() {
-    const { set } = await fetch('/config/groq-key').then(r => r.json());
+    const { set } = await fetch('/config/groq-key').then(r=>r.json());
     document.getElementById('groq-status').textContent = set ? 'Configurada' : 'Não configurada';
-    document.getElementById('groq-dot').className = 'dot ' + (set ? 'ok' : 'missing');
+    document.getElementById('groq-pip').className = 'pip ' + (set ? 'pip-ok' : 'pip-err');
   }
 
   document.getElementById('groq-save').onclick = async () => {
     const key = document.getElementById('groq-input').value.trim();
-    await fetch('/config/groq-key', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key }) });
+    await fetch('/config/groq-key',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key})});
     document.getElementById('groq-input').value = '';
     await loadGroqStatus();
     toast(key ? 'API Key salva' : 'API Key removida');
@@ -580,8 +628,7 @@
   let toastTimer;
   function toast(msg) {
     const el = document.getElementById('toast');
-    el.textContent = msg;
-    el.classList.add('show');
+    el.textContent = msg; el.classList.add('show');
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
   }
