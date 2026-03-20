@@ -22,7 +22,8 @@ if (event.type === 'audio' && isMe && autotranscribe.isEnabled(event.groupId)) {
       : event.sender;
     const text = await transcribe(event.buffer, event.mimetype).catch((err) => { console.error('[transcribe] erro:', err.message); return null; });
     if (text) {
-      await wa.sendMessage(event.groupId, `*${displaySender}:*\n${text}`);
+      await wa.sendMessage(event.groupId, `*${displaySender}:*`);
+      await wa.sendMessage(event.groupId, text);
     }
     return;
   }
