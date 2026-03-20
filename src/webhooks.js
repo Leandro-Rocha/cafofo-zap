@@ -32,10 +32,14 @@ async function dispatch(event) {
     type: event.type,
     groupId: event.groupId,
     sender: event.sender,
+    senderJid: event.senderJid || null,
+    isMySender: event.isMySender || false,
+    isSelfChat: event.isSelfChat || false,
+    forwarded: event.forwarded || false,
+    originalSender: event.originalSender || null,
     text: event.text || null,
     audioBase64: event.buffer ? event.buffer.toString('base64') : null,
     mimetype: event.mimetype || null,
-    transcription: event.transcription || null,
     timestamp: Date.now(),
   };
 

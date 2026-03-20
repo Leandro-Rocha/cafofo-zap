@@ -3,83 +3,27 @@ const express = require('express');
 const path = require('path');
 const wa = require('./whatsapp');
 const webhooks = require('./webhooks');
-const { transcribe } = require('./transcribe');
-const autotranscribe = require('./autotranscribe');
-const senders = require('./senders');
 const logger = require('./logger');
-const { getGroqApiKey, setConfig, getConfig } = require('./config');
 
 const app = express();
 app.use(express.json());
 
-// --- WhatsApp message handler ---
-
-async function sendToInbox(label, text) {
-  const inboxJid = getConfig('transcribe_inbox_jid');
-  if (!inboxJid) { console.error('[transcribe] caixa de entrada não configurada'); return; }
-  if (label) await wa.sendMessage(inboxJid, `*${label}:*`);
-  await wa.sendMessage(inboxJid, text);
-}
+// ── Dispatch all incoming messages to registered webhooks ──
 
 wa.setMessageHandler(async (event) => {
-  const isMe = event.isMySender;
-
-  // Áudio em self-chat (Mensagens Salvas) → caixa de entrada
-  if (event.type === 'audio' && event.isSelfChat) {
-    const label = event.forwarded && event.originalSender ? event.originalSender : null;
-    const text = await transcribe(event.buffer, event.mimetype).catch((err) => { console.error('[transcribe] erro:', err.message); return null; });
-    if (text) await sendToInbox(label, text);
-    return;
-  }
-
-  // Áudio próprio ou encaminhado em grupo habilitado → caixa de entrada
-  if (event.type === 'audio' && isMe && autotranscribe.isEnabled(event.groupId)) {
-    const label = event.forwarded ? event.originalSender : event.sender;
-    const text = await transcribe(event.buffer, event.mimetype).catch((err) => { console.error('[transcribe] erro:', err.message); return null; });
-    if (text) await sendToInbox(label, text);
-    return;
-  }
-
-  if (isMe) return;
-
-  // Rastreia remetentes conhecidos
-  if (event.senderJid && event.sender) senders.trackSeen(event.senderJid, event.sender);
-
-  // Áudio de remetente monitorado → caixa de entrada
-  if (event.type === 'audio' && senders.isMonitored(event.senderJid)) {
-    const text = await transcribe(event.buffer, event.mimetype).catch((err) => { console.error('[transcribe] erro:', err.message); return null; });
-    if (text) await sendToInbox(event.sender, text);
-    return;
-  }
-
-  if (event.type === 'audio' && getGroqApiKey()) {
-    event.transcription = await transcribe(event.buffer, event.mimetype);
-  }
   await webhooks.dispatch(event);
-});
-
-wa.setContactsHandler((contacts) => {
-  for (const c of contacts) {
-    const name = c.notify || c.verifiedName || c.name;
-    if (c.id && name && (c.id.endsWith('@s.whatsapp.net') || c.id.endsWith('@lid'))) {
-      senders.trackSeen(c.id, name);
-    }
-  }
 });
 
 wa.connect().catch((err) => console.error('[zap] falha ao conectar:', err.message));
 
-// --- Routes ---
+// ── Routes ──
 
-// Status & QR
 app.get('/status', (req, res) => res.json(wa.getStatus()));
 
-// Groups
 app.get('/groups', async (req, res) => {
   res.json(await wa.getGroups());
 });
 
-// Send message
 app.post('/send', async (req, res) => {
   const { groupId, text } = req.body;
   if (!groupId || !text) return res.status(400).json({ error: 'groupId e text obrigatórios' });
@@ -91,7 +35,6 @@ app.post('/send', async (req, res) => {
   }
 });
 
-// Webhooks
 app.get('/webhooks', (req, res) => res.json(webhooks.list()));
 
 app.post('/webhooks', (req, res) => {
@@ -106,7 +49,6 @@ app.delete('/webhooks/:id', (req, res) => {
   res.status(204).end();
 });
 
-// Deploy notification
 app.post('/notify/deploy', async (req, res) => {
   const { groupId, commit, branch, actor, status, service } = req.body;
   if (!groupId || !groupId.trim()) return res.status(400).json({ error: 'groupId obrigatório' });
@@ -124,52 +66,6 @@ app.post('/notify/deploy', async (req, res) => {
   }
 });
 
-// Auto-transcrição
-app.get('/autotranscribe', (req, res) => res.json(autotranscribe.list()));
-
-app.post('/autotranscribe/:groupId', (req, res) => {
-  autotranscribe.enable(decodeURIComponent(req.params.groupId));
-  res.json({ ok: true });
-});
-
-app.delete('/autotranscribe/:groupId', (req, res) => {
-  autotranscribe.disable(decodeURIComponent(req.params.groupId));
-  res.json({ ok: true });
-});
-
-// Config
-app.get('/config/groq-key', (_, res) => res.json({ set: !!getGroqApiKey() }));
-
-app.post('/config/groq-key', (req, res) => {
-  const { key } = req.body;
-  setConfig('groq_api_key', key || null);
-  res.json({ ok: true });
-});
-
-app.get('/config/inbox', (_, res) => res.json({ jid: getConfig('transcribe_inbox_jid') }));
-
-app.post('/config/inbox', (req, res) => {
-  const { jid } = req.body;
-  setConfig('transcribe_inbox_jid', jid || null);
-  res.json({ ok: true });
-});
-
-// Remetentes monitorados
-app.get('/senders', (_, res) => res.json(senders.listKnown()));
-
-app.post('/senders', (req, res) => {
-  const { jid, name } = req.body;
-  if (!jid) return res.status(400).json({ error: 'jid obrigatório' });
-  senders.add(jid, name);
-  res.status(201).json({ ok: true });
-});
-
-app.delete('/senders/:jid', (req, res) => {
-  senders.remove(decodeURIComponent(req.params.jid));
-  res.status(204).end();
-});
-
-// Disconnect
 app.post('/disconnect', (req, res) => {
   wa.disconnect();
   res.json({ ok: true });
@@ -177,7 +73,6 @@ app.post('/disconnect', (req, res) => {
 
 app.get('/health', (_, res) => res.json({ ok: true }));
 
-// Logs
 app.get('/logs/history', (_, res) => res.json(logger.getLines()));
 
 app.get('/logs/stream', (req, res) => {
@@ -190,7 +85,6 @@ app.get('/logs/stream', (req, res) => {
 });
 
 app.get('/logs', (_, res) => res.sendFile(path.join(__dirname, 'logs.html')));
-
 app.get('/', (_, res) => res.sendFile(path.join(__dirname, 'admin.html')));
 
 const PORT = process.env.PORT || 3010;

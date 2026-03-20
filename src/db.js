@@ -15,22 +15,6 @@ db.exec(`
     secret TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
-  CREATE TABLE IF NOT EXISTS autotranscribe (
-    group_id TEXT PRIMARY KEY
-  );
-  CREATE TABLE IF NOT EXISTS config (
-    key TEXT PRIMARY KEY,
-    value TEXT NOT NULL
-  );
-  CREATE TABLE IF NOT EXISTS transcribe_senders (
-    jid TEXT PRIMARY KEY,
-    name TEXT NOT NULL
-  );
-  CREATE TABLE IF NOT EXISTS known_senders (
-    jid TEXT PRIMARY KEY,
-    name TEXT NOT NULL,
-    last_seen DATETIME DEFAULT CURRENT_TIMESTAMP
-  );
 `);
 
 module.exports = db;
