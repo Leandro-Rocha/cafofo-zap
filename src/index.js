@@ -50,6 +50,15 @@ wa.setMessageHandler(async (event) => {
   await webhooks.dispatch(event);
 });
 
+wa.setContactsHandler((contacts) => {
+  for (const c of contacts) {
+    const name = c.notify || c.verifiedName || c.name;
+    if (c.id && name && c.id.endsWith('@s.whatsapp.net')) {
+      senders.trackSeen(c.id, name);
+    }
+  }
+});
+
 wa.connect().catch((err) => console.error('[zap] falha ao conectar:', err.message));
 
 // --- Routes ---

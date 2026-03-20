@@ -19,12 +19,12 @@ let sock = null;
 let currentQR = null;
 let status = 'disconnected';
 let onMessage = null;
+let onContacts = null;
 let myJid = null;
 let myLid = null;
 
-function setMessageHandler(fn) {
-  onMessage = fn;
-}
+function setMessageHandler(fn) { onMessage = fn; }
+function setContactsHandler(fn) { onContacts = fn; }
 
 function getStatus() {
   return { status, qr: currentQR };
@@ -64,6 +64,14 @@ async function connect() {
   });
 
   sock.ev.on('creds.update', saveCreds);
+
+  sock.ev.on('contacts.set', ({ contacts }) => {
+    if (onContacts) onContacts(contacts);
+  });
+
+  sock.ev.on('contacts.update', (updates) => {
+    if (onContacts) onContacts(updates);
+  });
 
   sock.ev.on('messages.upsert', async ({ messages, type }) => {
     if (!onMessage) return;
@@ -158,4 +166,4 @@ function disconnect() {
 
 function getMyJid() { return myJid; }
 
-module.exports = { connect, getStatus, getGroups, sendMessage, setMessageHandler, disconnect, getMyJid };
+module.exports = { connect, getStatus, getGroups, sendMessage, setMessageHandler, setContactsHandler, disconnect, getMyJid };
