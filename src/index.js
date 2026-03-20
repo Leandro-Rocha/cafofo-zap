@@ -16,13 +16,10 @@ app.use(express.json());
 wa.setMessageHandler(async (event) => {
   const isMe = event.isMySender;
 
-  if (event.type === 'audio') console.log(`[handler] audio isMe=${isMe} forwarded=${event.forwarded} originalSender=${event.originalSender} atEnabled=${autotranscribe.isEnabled(event.groupId)}`);
-
-  if (event.type === 'audio' && isMe && autotranscribe.isEnabled(event.groupId)) {
+if (event.type === 'audio' && isMe && autotranscribe.isEnabled(event.groupId)) {
     const displaySender = event.forwarded
-      ? (event.originalSender || null)
+      ? (event.originalSender || 'Encaminhado')
       : event.sender;
-    if (!displaySender) return; // encaminhado sem remetente identificável
     const text = await transcribe(event.buffer, event.mimetype).catch((err) => { console.error('[transcribe] erro:', err.message); return null; });
     if (text) {
       await wa.sendMessage(event.groupId, `*${displaySender}:*\n${text}`);
