@@ -8,8 +8,9 @@
     :root {
       --bg:       #F5F3EF;
       --surface:  #FFFFFF;
-      --surface2: #FAF9F7;
+      --surface2: #F9F7F4;
       --border:   #E6E1D8;
+      --border2:  #EDE9E2;
       --text:     #1A1410;
       --text2:    #6B5E52;
       --muted:    #ADA090;
@@ -20,7 +21,7 @@
       --amber-bg: #FDF0DF;
       --red:      #991818;
       --red-bg:   #FEECEC;
-      --r:        13px;
+      --r:        12px;
       --r-sm:     8px;
     }
 
@@ -35,7 +36,7 @@
     }
 
     #app {
-      max-width: 460px;
+      max-width: 440px;
       margin: 0 auto;
       min-height: 100vh;
       display: flex;
@@ -44,45 +45,46 @@
 
     /* ─── HEADER ─── */
     header {
-      height: 52px;
+      height: 50px;
       background: var(--surface);
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
-      padding: 0 16px;
-      gap: 10px;
+      padding: 0 14px;
+      gap: 9px;
       position: sticky;
       top: 0;
       z-index: 30;
     }
 
     .logo-mark {
-      width: 28px; height: 28px;
+      width: 26px; height: 26px;
       background: var(--green);
       border-radius: 7px;
       display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
     }
-    .logo-mark svg { width: 15px; height: 15px; fill: #fff; }
+    .logo-mark svg { width: 14px; height: 14px; fill: #fff; }
 
     .logo-text {
-      font-size: 13px; font-weight: 700;
-      letter-spacing: 0.08em;
+      font-size: 12.5px; font-weight: 700;
+      letter-spacing: 0.09em;
       text-transform: uppercase;
       flex: 1;
     }
 
     .conn-pill {
       display: flex; align-items: center; gap: 5px;
-      padding: 3px 9px;
+      padding: 3px 8px;
       border-radius: 20px;
       font-size: 11px; font-weight: 600;
-      letter-spacing: 0.03em;
+      letter-spacing: 0.02em;
       transition: all .3s;
     }
     .conn-pill .dot {
       width: 6px; height: 6px;
       border-radius: 50%;
+      flex-shrink: 0;
       transition: background .3s;
     }
     .conn-pill.connected  { background: var(--green-bg); color: var(--green); }
@@ -100,16 +102,16 @@
       border-bottom: 1px solid var(--border);
       display: flex;
       position: sticky;
-      top: 52px;
+      top: 50px;
       z-index: 29;
-      padding: 0 12px;
+      padding: 0 10px;
     }
     .tab {
       background: none; border: none;
       border-bottom: 2px solid transparent;
-      padding: 11px 12px 9px;
-      font-size: 11.5px; font-weight: 600;
-      letter-spacing: 0.05em;
+      padding: 10px 10px 8px;
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
       color: var(--muted);
       cursor: pointer;
@@ -119,67 +121,64 @@
     .tab:hover:not(.active) { color: var(--text2); }
 
     /* ─── MAIN ─── */
-    main { flex: 1; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
-    .page { display: none; flex-direction: column; gap: 10px; animation: fadeUp .15s ease; }
+    main { flex: 1; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+    .page { display: none; flex-direction: column; gap: 10px; animation: fadeUp .12s ease; }
     .page.active { display: flex; }
-    @keyframes fadeUp { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:translateY(0) } }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(5px) } to { opacity:1; transform:translateY(0) } }
 
-    /* ─── STATUS CARD ─── */
-    #status-card {
+    /* ─── STATUS PAGE ─── */
+    #status-banner {
       border-radius: var(--r);
-      overflow: hidden;
-      transition: background .5s, border .5s, box-shadow .5s;
+      padding: 16px;
+      display: flex; align-items: center; gap: 12px;
     }
-    #status-card.connected {
-      background: linear-gradient(150deg, #1B5E3A 0%, #0F3B22 100%);
-      box-shadow: 0 4px 20px rgba(27,94,58,.25);
-    }
-    #status-card.connecting, #status-card.disconnected {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      box-shadow: 0 1px 4px rgba(0,0,0,.05);
-    }
+    #status-banner.connected { background: var(--green-bg); }
+    #status-banner.connecting { background: var(--amber-bg); }
+    #status-banner.disconnected { background: var(--red-bg); }
 
-    #status-face {
-      padding: 30px 20px 24px;
-      display: flex; flex-direction: column;
-      align-items: center; gap: 10px;
-    }
-
-    .s-icon {
-      width: 54px; height: 54px; border-radius: 50%;
+    .s-orb {
+      width: 38px; height: 38px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
     }
-    .s-icon svg { width: 26px; height: 26px; }
-    .s-icon.connected { background: rgba(255,255,255,.15); }
-    .s-icon.connected svg { fill: #fff; }
-    .s-icon.connecting { background: var(--amber-bg); }
-    .s-icon.connecting svg { fill: var(--amber); animation: spin 1.4s linear infinite; }
-    .s-icon.disconnected { background: var(--red-bg); }
-    .s-icon.disconnected svg { fill: var(--red); }
+    .s-orb svg { width: 18px; height: 18px; }
+    .connected .s-orb { background: rgba(27,94,58,.15); }
+    .connected .s-orb svg { fill: var(--green); }
+    .connecting .s-orb { background: rgba(144,74,7,.12); }
+    .connecting .s-orb svg { fill: var(--amber); animation: spin 1.4s linear infinite; }
+    .disconnected .s-orb { background: rgba(153,24,24,.12); }
+    .disconnected .s-orb svg { fill: var(--red); }
+
     @keyframes spin { to { transform: rotate(360deg) } }
 
-    .s-heading { font-size: 16px; font-weight: 600; }
-    .s-heading.connected { color: #fff; }
-    .s-heading.connecting { color: var(--amber); }
-    .s-heading.disconnected { color: var(--text); }
+    .s-info { flex: 1; min-width: 0; }
+    .s-label { font-size: 14px; font-weight: 600; }
+    .connected .s-label { color: var(--green); }
+    .connecting .s-label { color: var(--amber); }
+    .disconnected .s-label { color: var(--red); }
+    .s-sub { font-size: 11.5px; margin-top: 2px; }
+    .connected .s-sub { color: #3A7D56; }
+    .connecting .s-sub { color: #9D6020; }
+    .disconnected .s-sub { color: #A03030; }
 
-    .s-sub { font-size: 12px; }
-    .s-sub.connected { color: rgba(255,255,255,.55); }
-    .s-sub.connecting { color: var(--text2); }
-    .s-sub.disconnected { color: var(--muted); }
-
-    #qr-wrap {
-      display: none; flex-direction: column; align-items: center;
-      gap: 14px; padding: 0 24px 28px;
-    }
-    #qr-wrap img {
-      width: 188px; height: 188px;
-      border-radius: 10px;
+    #qr-card {
+      display: none;
+      background: var(--surface);
       border: 1px solid var(--border);
-      padding: 6px; background: #fff;
+      border-radius: var(--r);
+      padding: 20px;
+      align-items: center;
+      flex-direction: column;
+      gap: 12px;
     }
-    #qr-wrap p { font-size: 11.5px; color: var(--text2); text-align: center; line-height: 1.65; }
+    #qr-card.show { display: flex; }
+    #qr-card img {
+      width: 180px; height: 180px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      padding: 5px; background: #fff;
+    }
+    #qr-card p { font-size: 11.5px; color: var(--text2); text-align: center; line-height: 1.6; max-width: 260px; }
 
     /* ─── CARDS ─── */
     .card {
@@ -191,155 +190,179 @@
 
     .card-head {
       display: flex; align-items: center; gap: 8px;
-      padding: 11px 14px 9px;
-      border-bottom: 1px solid #F2EEE8;
+      padding: 10px 13px 8px;
+      border-bottom: 1px solid var(--border2);
     }
     .ci {
-      width: 24px; height: 24px; border-radius: 6px;
+      width: 22px; height: 22px; border-radius: 6px;
       display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
     }
-    .ci svg { width: 13px; height: 13px; }
+    .ci svg { width: 12px; height: 12px; }
     .ci-g { background: var(--green-bg); } .ci-g svg { fill: var(--green); }
     .ci-b { background: #DBEAFE; } .ci-b svg { fill: #1D4ED8; }
     .ci-p { background: #EDE9FE; } .ci-p svg { fill: #6D28D9; }
     .ci-a { background: var(--amber-bg); } .ci-a svg { fill: var(--amber); }
-    .card-title { font-size: 11.5px; font-weight: 600; color: var(--text2); letter-spacing: 0.03em; }
+    .card-title { font-size: 11px; font-weight: 600; color: var(--text2); letter-spacing: 0.04em; text-transform: uppercase; }
 
-    .card-empty { padding: 22px 14px; text-align: center; color: var(--muted); font-size: 13px; }
+    .card-empty { padding: 18px 13px; text-align: center; color: var(--muted); font-size: 12.5px; }
 
     /* ─── ROWS ─── */
     .row {
       display: flex; align-items: center; gap: 10px;
-      padding: 10px 14px;
-      border-bottom: 1px solid #F2EEE8;
+      padding: 9px 13px;
+      border-bottom: 1px solid var(--border2);
       transition: background .1s;
     }
     .row:last-child { border-bottom: none; }
-    .row:hover { background: var(--surface2); }
 
     .avatar {
-      width: 33px; height: 33px;
+      width: 32px; height: 32px;
       border-radius: 8px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 11px; font-weight: 800;
+      font-size: 10.5px; font-weight: 800;
       color: #fff; flex-shrink: 0;
-      letter-spacing: .01em;
     }
 
     .row-info { flex: 1; min-width: 0; }
-    .row-name { font-size: 13.5px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .row-sub { font-size: 10px; color: var(--muted); font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+    .row-name { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .row-sub { font-size: 10px; color: var(--muted); font-family: 'SF Mono', 'Fira Code', monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
 
     /* ─── TOGGLE ─── */
-    .toggle { position: relative; width: 42px; height: 23px; flex-shrink: 0; }
+    .toggle { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
     .toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
     .slider {
       position: absolute; inset: 0;
-      background: #DDD7CC; border-radius: 23px; cursor: pointer;
+      background: #DDD7CC; border-radius: 22px; cursor: pointer;
       transition: background .2s;
     }
     .slider::before {
       content: ''; position: absolute;
-      width: 17px; height: 17px; left: 3px; top: 3px;
+      width: 16px; height: 16px; left: 3px; top: 3px;
       background: #fff; border-radius: 50%;
-      transition: transform .22s cubic-bezier(.34,1.56,.64,1);
+      transition: transform .2s cubic-bezier(.34,1.56,.64,1);
       box-shadow: 0 1px 3px rgba(0,0,0,.18);
     }
     input:checked + .slider { background: var(--green2); }
-    input:checked + .slider::before { transform: translateX(19px); }
+    input:checked + .slider::before { transform: translateX(18px); }
 
-    /* ─── FORM ─── */
-    .form-area { padding: 11px 14px; display: flex; gap: 8px; align-items: center; }
+    /* ─── FIELD ─── */
+    .field { padding: 11px 13px; display: flex; flex-direction: column; gap: 6px; }
+    .field + .field { border-top: 1px solid var(--border2); }
+    .field-label { font-size: 11px; color: var(--muted); font-weight: 500; letter-spacing: 0.03em; }
 
-    input[type=text], input[type=password], select {
+    .field-row { display: flex; gap: 7px; align-items: stretch; }
+
+    .select-wrap {
+      flex: 1; position: relative; min-width: 0;
+    }
+    .select-wrap::after {
+      content: '';
+      position: absolute;
+      right: 10px; top: 50%; transform: translateY(-50%);
+      width: 0; height: 0;
+      border-left: 4px solid transparent;
+      border-right: 4px solid transparent;
+      border-top: 5px solid var(--muted);
+      pointer-events: none;
+    }
+    select {
+      width: 100%;
       background: var(--bg);
       border: 1.5px solid var(--border);
       color: var(--text);
-      padding: 7px 10px;
+      padding: 7px 28px 7px 9px;
       border-radius: var(--r-sm);
       font-size: 13px; outline: none;
-      transition: border-color .15s, box-shadow .15s, background .15s;
       font-family: inherit;
       -webkit-appearance: none; appearance: none;
+      transition: border-color .15s, box-shadow .15s;
+      cursor: pointer;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
-    select {
-      flex: 1; cursor: pointer;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='6' viewBox='0 0 11 6'%3E%3Cpath d='M1 1l4.5 4L10 1' stroke='%23ADA090' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 10px center;
-      padding-right: 28px;
+    select:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(27,94,58,.1); }
+
+    input[type=text], input[type=password] {
+      width: 100%;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      color: var(--text);
+      padding: 7px 9px;
+      border-radius: var(--r-sm);
+      font-size: 13px; outline: none;
+      font-family: inherit;
+      transition: border-color .15s, box-shadow .15s;
     }
-    input:focus, select:focus {
-      border-color: var(--green);
-      box-shadow: 0 0 0 3px rgba(27,94,58,.1);
-      background: #fff;
-    }
+    input:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(27,94,58,.1); background: #fff; }
 
     /* ─── BUTTON ─── */
     .btn {
       border: none; border-radius: var(--r-sm);
-      padding: 7px 15px;
-      font-size: 12.5px; font-weight: 600;
+      padding: 7px 14px;
+      font-size: 12px; font-weight: 600;
       cursor: pointer; white-space: nowrap;
       font-family: inherit; letter-spacing: .01em;
       transition: transform .1s, filter .1s;
+      flex-shrink: 0;
     }
     .btn:active { transform: scale(.97); }
     .btn-primary { background: var(--green); color: #fff; }
-    .btn-primary:hover { filter: brightness(1.12); }
+    .btn-primary:hover { filter: brightness(1.1); }
+    .btn-sm { padding: 6px 12px; font-size: 11.5px; }
 
-    /* ─── INFO STRIP ─── */
-    .info-strip {
+    /* ─── CURRENT STRIP ─── */
+    .current-strip {
       display: flex; justify-content: space-between; align-items: center;
-      padding: 8px 14px;
+      padding: 7px 13px;
       background: var(--surface2);
-      border-top: 1px solid #F0EBE2;
+      border-top: 1px solid var(--border2);
       font-size: 11.5px;
     }
-    .info-strip .label { color: var(--muted); }
-    .info-strip .value { color: var(--text); font-weight: 500; }
+    .current-strip .cs-label { color: var(--muted); }
+    .current-strip .cs-value { color: var(--text); font-weight: 500; max-width: 60%; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-    /* ─── HINT ─── */
-    .hint { padding: 8px 14px; font-size: 11px; color: var(--muted); border-top: 1px solid #F0EBE2; line-height: 1.6; }
-
-    /* ─── STATUS ROW (groq) ─── */
+    /* ─── STATUS ROW ─── */
     .status-row {
       display: flex; align-items: center; gap: 6px;
-      padding: 9px 14px;
-      border-top: 1px solid #F0EBE2;
+      padding: 8px 13px;
+      border-top: 1px solid var(--border2);
       background: var(--surface2);
-      font-size: 12px;
+      font-size: 11.5px;
     }
-    .pip { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .pip { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
     .pip-ok { background: var(--green2); }
     .pip-err { background: var(--red); }
-    .status-row span { color: var(--muted); }
-    .status-row strong { color: var(--text); font-weight: 500; margin-left: 2px; }
+    .status-row .sr-label { color: var(--muted); }
+    .status-row .sr-value { color: var(--text); font-weight: 500; margin-left: 2px; }
+
+    /* ─── HINT ─── */
+    .hint { padding: 7px 13px; font-size: 11px; color: var(--muted); border-top: 1px solid var(--border2); line-height: 1.6; }
 
     /* ─── LINK ROW ─── */
     a.link-row {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 13px 14px;
-      font-size: 13.5px; font-weight: 500;
+      padding: 12px 13px;
+      font-size: 13px; font-weight: 500;
       color: var(--text); text-decoration: none;
       transition: background .1s;
     }
     a.link-row:hover { background: var(--surface2); }
-    .chevron { color: var(--muted); font-size: 18px; line-height: 1; }
+    a.link-row .chevron { color: var(--muted); }
 
     /* ─── TOAST ─── */
     #toast {
-      position: fixed; bottom: 22px; left: 50%;
-      transform: translateX(-50%) translateY(8px);
-      background: rgba(26,20,16,.9);
+      position: fixed; bottom: 20px; left: 50%;
+      transform: translateX(-50%) translateY(6px);
+      background: rgba(26,20,16,.88);
       backdrop-filter: blur(10px);
       color: #fff;
-      padding: 8px 18px;
+      padding: 7px 16px;
       border-radius: 20px;
-      font-size: 12.5px; font-weight: 500;
+      font-size: 12px; font-weight: 500;
       opacity: 0; pointer-events: none;
-      transition: opacity .2s, transform .2s;
+      transition: opacity .18s, transform .18s;
       white-space: nowrap; z-index: 99;
     }
     #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -369,12 +392,19 @@
 
     <!-- ── STATUS ── -->
     <div class="page active" id="page-status">
-      <div id="status-card" class="disconnected">
-        <div id="status-face"></div>
-        <div id="qr-wrap">
-          <img id="qr" src="" alt="QR Code">
-          <p>Abra o WhatsApp → Menu → Dispositivos vinculados → Vincular dispositivo</p>
+      <div id="status-banner" class="disconnected">
+        <div class="s-orb">
+          <svg id="s-icon" viewBox="0 0 24 24"><path id="s-icon-path" d=""/></svg>
         </div>
+        <div class="s-info">
+          <div class="s-label" id="s-label">—</div>
+          <div class="s-sub" id="s-sub"></div>
+        </div>
+      </div>
+
+      <div id="qr-card">
+        <img id="qr" src="" alt="QR Code">
+        <p>Abra o WhatsApp → Menu → Dispositivos vinculados → Vincular dispositivo</p>
       </div>
     </div>
 
@@ -388,13 +418,17 @@
           </div>
           <span class="card-title">Destino das transcrições</span>
         </div>
-        <div class="form-area">
-          <select id="inbox-select"><option value="">— escolha um grupo —</option></select>
-          <button class="btn btn-primary" id="inbox-save">Salvar</button>
+        <div class="field">
+          <div class="field-row">
+            <div class="select-wrap">
+              <select id="inbox-select"><option value="">Escolha um grupo…</option></select>
+            </div>
+            <button class="btn btn-primary btn-sm" id="inbox-save">Salvar</button>
+          </div>
         </div>
-        <div class="info-strip">
-          <span class="label">Atual</span>
-          <span class="value" id="inbox-current">não configurado</span>
+        <div class="current-strip">
+          <span class="cs-label">Atual</span>
+          <span class="cs-value" id="inbox-current">não configurado</span>
         </div>
       </div>
 
@@ -406,7 +440,7 @@
           <span class="card-title">Remetentes monitorados</span>
         </div>
         <div id="senders-list"></div>
-        <div class="hint">Aparecem automaticamente conforme enviam mensagens nos grupos.</div>
+        <div class="hint">Aparecem conforme enviam mensagens nos grupos.</div>
       </div>
 
       <div class="card">
@@ -431,21 +465,23 @@
           </div>
           <span class="card-title">Groq API Key</span>
         </div>
-        <div class="form-area">
-          <input type="password" id="groq-input" placeholder="gsk_..." style="flex:1">
-          <button class="btn btn-primary" id="groq-save">Salvar</button>
+        <div class="field">
+          <div class="field-row">
+            <input type="password" id="groq-input" placeholder="gsk_…" style="flex:1">
+            <button class="btn btn-primary btn-sm" id="groq-save">Salvar</button>
+          </div>
         </div>
         <div class="status-row">
           <div class="pip pip-err" id="groq-pip"></div>
-          <span>Status</span>
-          <strong id="groq-status">Não configurada</strong>
+          <span class="sr-label">Status</span>
+          <span class="sr-value" id="groq-status">Não configurada</span>
         </div>
       </div>
 
       <div class="card">
         <div class="card-head">
           <div class="ci ci-g">
-            <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
           </div>
           <span class="card-title">Ferramentas</span>
         </div>
@@ -463,15 +499,13 @@
 <div id="toast"></div>
 
 <script>
-  // ── Icons ──
   const IC = {
-    check:  'M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z',
-    spin:   'M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z',
-    disc:   'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z',
+    check: 'M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z',
+    spin:  'M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z',
+    disc:  'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z',
   };
-
-  const STATUS_LABELS = { connected: 'Conectado', connecting: 'Conectando', disconnected: 'Desconectado' };
-  const STATUS_SUBS   = { connected: 'WhatsApp ativo e funcionando', connecting: 'Aguardando QR Code…', disconnected: 'Sem conexão com o WhatsApp' };
+  const LABELS = { connected: 'Conectado', connecting: 'Conectando', disconnected: 'Desconectado' };
+  const SUBS   = { connected: 'WhatsApp ativo e funcionando', connecting: 'Aguardando leitura do QR Code…', disconnected: 'Sem conexão com o WhatsApp' };
 
   // ── Nav ──
   document.querySelectorAll('.tab').forEach(btn => {
@@ -490,7 +524,7 @@
     return PALETTE[h % PALETTE.length];
   }
   function initials(name) {
-    return name.split(/\s+/).slice(0,2).map(w => w[0]||'').join('').toUpperCase() || '?';
+    return name.split(/\s+/).slice(0,2).map(w=>w[0]||'').join('').toUpperCase() || '?';
   }
 
   // ── State ──
@@ -498,30 +532,25 @@
 
   // ── Status ──
   async function refresh() {
-    const data = await fetch('/status').then(r=>r.json()).catch(()=>({ status:'disconnected' }));
+    const data = await fetch('/status').then(r=>r.json()).catch(()=>({status:'disconnected'}));
     const s = data.status;
 
-    // Header pill
     const pill = document.getElementById('conn-pill');
     pill.className = 'conn-pill ' + s;
-    document.getElementById('conn-label').textContent = STATUS_LABELS[s] || s;
+    document.getElementById('conn-label').textContent = LABELS[s] || s;
 
-    // Status card
-    const card = document.getElementById('status-card');
-    card.className = s;
+    const banner = document.getElementById('status-banner');
+    banner.className = s;
+    document.getElementById('s-icon-path').setAttribute('d', s==='connected'?IC.check:s==='connecting'?IC.spin:IC.disc);
+    document.getElementById('s-label').textContent = LABELS[s] || s;
+    document.getElementById('s-sub').textContent = SUBS[s] || '';
 
-    const face = document.getElementById('status-face');
-    face.innerHTML = `
-      <div class="s-icon ${s}"><svg viewBox="0 0 24 24"><path d="${s==='connected'?IC.check:s==='connecting'?IC.spin:IC.disc}"/></svg></div>
-      <div class="s-heading ${s}">${STATUS_LABELS[s]||s}</div>
-      <div class="s-sub ${s}">${STATUS_SUBS[s]||''}</div>`;
-
-    const qrWrap = document.getElementById('qr-wrap');
+    const qr = document.getElementById('qr-card');
     if (data.qr) {
       document.getElementById('qr').src = data.qr;
-      qrWrap.style.display = 'flex';
+      qr.classList.add('show');
     } else {
-      qrWrap.style.display = 'none';
+      qr.classList.remove('show');
     }
 
     if (s === 'connected' && lastStatus !== 'connected') loadGroups();
@@ -567,7 +596,7 @@
     const sel = document.getElementById('inbox-select');
     const cur = document.getElementById('inbox-current');
     const { jid } = await fetch('/config/inbox').then(r=>r.json());
-    sel.innerHTML = '<option value="">— escolha um grupo —</option>';
+    sel.innerHTML = '<option value="">Escolha um grupo…</option>';
     groupsCache.forEach(g => sel.appendChild(new Option(g.name, g.id, false, g.id===jid)));
     const found = groupsCache.find(g=>g.id===jid);
     cur.textContent = found ? found.name : (jid || 'não configurado');
