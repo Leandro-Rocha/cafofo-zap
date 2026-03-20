@@ -14,9 +14,13 @@ app.use(express.json());
 
 wa.setMessageHandler(async (event) => {
   const isMe = event.isMySender;
+  const atEnabled = autotranscribe.isEnabled(event.groupId);
+  console.log(`[handler] type=${event.type} isMe=${isMe} atEnabled=${atEnabled} groupId=${event.groupId} bufferSize=${event.buffer?.length}`);
 
-  if (event.type === 'audio' && isMe && autotranscribe.isEnabled(event.groupId)) {
-    const text = await transcribe(event.buffer, event.mimetype);
+  if (event.type === 'audio' && isMe && atEnabled) {
+    console.log('[handler] iniciando transcrição...');
+    const text = await transcribe(event.buffer, event.mimetype).catch((err) => { console.error('[handler] transcribe erro:', err.message); return null; });
+    console.log(`[handler] transcrição resultado: ${text}`);
     if (text) {
       await wa.sendMessage(event.groupId, `📝 ${text}`);
     }
