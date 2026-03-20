@@ -64,6 +64,7 @@ async function connect() {
   sock.ev.on('creds.update', saveCreds);
 
   sock.ev.on('messages.upsert', async ({ messages, type }) => {
+    console.log(`[zap] messages.upsert type=${type} count=${messages.length}`, messages.map(m => ({ fromMe: m.key.fromMe, jid: m.key.remoteJid, hasAudio: !!m.message?.audioMessage })));
     if (!onMessage) return;
     // 'notify': mensagens novas (de outros e próprias via multi-device)
     // 'append': mensagens próprias sincronizadas de volta pelo WhatsApp
