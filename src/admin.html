@@ -16,7 +16,7 @@
     #qr-box img { display: block; width: 240px; height: 240px; }
     .section { width: 100%; max-width: 420px; display: none; flex-direction: column; gap: 8px; }
     .section h2 { font-size: 0.85rem; opacity: 0.5; text-transform: uppercase; letter-spacing: 1px; }
-    .group { background: #1e1e1e; border-radius: 8px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .row { background: #1e1e1e; border-radius: 8px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
     .group-info { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; cursor: pointer; }
     .group-info:hover .group-name { opacity: 0.8; }
     .group-name { font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -28,6 +28,12 @@
     .slider:before { content: ''; position: absolute; width: 16px; height: 16px; left: 3px; top: 3px; background: #eee; border-radius: 50%; transition: transform 0.2s; }
     input:checked + .slider { background: #4caf50; }
     input:checked + .slider:before { transform: translateX(18px); }
+    input[type=text], input[type=password] { background: #111; border: 1px solid #444; color: #eee; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; }
+    select { background: #111; border: 1px solid #444; color: #eee; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; flex: 1; }
+    button { background: #333; border: none; color: #ccc; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
+    button:hover { background: #444; }
+    button.primary { background: #2a4a2a; color: #4caf50; }
+    button.danger { background: #4a1a1a; color: #f44336; }
     #msg { font-size: 0.8rem; opacity: 0.4; }
   </style>
 </head>
@@ -41,18 +47,39 @@
     <div id="groups-list"></div>
   </div>
 
+  <!-- Caixa de transcrição -->
+  <div id="inbox-section" class="section">
+    <h2>Caixa de transcrição</h2>
+    <div class="row" style="gap:8px; flex-wrap:wrap;">
+      <span style="font-size:0.85rem;width:100%">Destino das transcrições</span>
+      <select id="inbox-select"><option value="">— escolha um grupo —</option></select>
+      <button class="primary" id="inbox-save">salvar</button>
+    </div>
+    <div style="font-size:0.8rem; opacity:0.5; padding: 0 4px">Destino atual: <span id="inbox-current">não configurado</span></div>
+
+    <h2 style="margin-top:8px">Remetentes monitorados</h2>
+    <div id="senders-list"></div>
+    <div class="row" style="gap:8px; flex-wrap:wrap;">
+      <input id="sender-name" type="text" placeholder="Nome" style="width:120px">
+      <input id="sender-phone" type="text" placeholder="55119..." style="flex:1">
+      <button class="primary" id="sender-add">+ add</button>
+    </div>
+  </div>
+
+  <!-- Grupos para encaminhamento -->
   <div id="autotranscribe-section" class="section">
-    <h2>Auto-transcrição de áudio</h2>
+    <h2>Encaminhamento de áudio</h2>
     <div id="autotranscribe-list"></div>
   </div>
 
+  <!-- Configuração -->
   <div id="config-section" class="section" style="display:flex;">
     <h2>Configuração</h2>
-    <div class="group" style="gap:8px;">
+    <div class="row" style="gap:8px;">
       <span style="font-size:0.85rem;flex:1">Groq API Key</span>
       <span id="groq-status" style="font-size:0.75rem;opacity:0.5">...</span>
-      <input id="groq-input" type="password" placeholder="gsk_..." style="background:#111;border:1px solid #444;color:#eee;padding:4px 8px;border-radius:4px;font-size:0.8rem;width:200px;">
-      <button id="groq-save" style="background:#2a4a2a;color:#4caf50;border:none;padding:4px 10px;border-radius:4px;cursor:pointer;font-size:0.8rem;">salvar</button>
+      <input id="groq-input" type="password" placeholder="gsk_..." style="width:180px;">
+      <button class="primary" id="groq-save">salvar</button>
     </div>
   </div>
 
@@ -66,6 +93,7 @@
     const groupsList = document.getElementById('groups-list');
     const atSection = document.getElementById('autotranscribe-section');
     const atList = document.getElementById('autotranscribe-list');
+    const inboxSection = document.getElementById('inbox-section');
     const msgEl = document.getElementById('msg');
 
     let groupsCache = [];
@@ -74,7 +102,6 @@
 
     async function refresh() {
       const data = await fetch('/status').then(r => r.json());
-
       statusEl.textContent = data.status;
       statusEl.className = data.status;
 
@@ -83,6 +110,7 @@
         qrBox.style.display = 'block';
         groupsEl.style.display = 'none';
         atSection.style.display = 'none';
+        inboxSection.style.display = 'none';
       } else {
         qrBox.style.display = 'none';
       }
@@ -90,6 +118,7 @@
       if (data.status === 'connected') {
         groupsEl.style.display = 'flex';
         atSection.style.display = 'flex';
+        inboxSection.style.display = 'flex';
         if (lastStatus !== 'connected') loadGroups();
       }
 
@@ -101,19 +130,19 @@
         fetch('/groups').then(r => r.json()),
         fetch('/autotranscribe').then(r => r.json()),
       ]);
-
       groupsCache = groups;
       enabledCache = new Set(enabled);
-
       renderGroups();
       renderAutotranscribe();
+      renderInboxGroupSelect();
+      renderSenders();
     }
 
     function renderGroups() {
       groupsList.innerHTML = '';
       groupsCache.forEach(g => {
         const el = document.createElement('div');
-        el.className = 'group';
+        el.className = 'row';
         el.innerHTML = `<div class="group-info">
           <span class="group-name">${g.name}</span>
           <span class="group-id">${g.id}</span>
@@ -131,7 +160,7 @@
       groupsCache.forEach(g => {
         const checked = enabledCache.has(g.id);
         const el = document.createElement('div');
-        el.className = 'group';
+        el.className = 'row';
         el.innerHTML = `
           <div class="group-info">
             <span class="group-name">${g.name}</span>
@@ -141,41 +170,101 @@
             <input type="checkbox" ${checked ? 'checked' : ''}>
             <span class="slider"></span>
           </label>`;
-
         const checkbox = el.querySelector('input');
         checkbox.onchange = async () => {
           const id = encodeURIComponent(g.id);
           if (checkbox.checked) {
             await fetch(`/autotranscribe/${id}`, { method: 'POST' });
             enabledCache.add(g.id);
-            flash(`✓ auto-transcrição ativada: ${g.name}`);
+            flash(`✓ encaminhamento ativado: ${g.name}`);
           } else {
             await fetch(`/autotranscribe/${id}`, { method: 'DELETE' });
             enabledCache.delete(g.id);
-            flash(`✗ auto-transcrição desativada: ${g.name}`);
+            flash(`✗ encaminhamento desativado: ${g.name}`);
           }
         };
-
         atList.appendChild(el);
       });
     }
 
-    function flash(text) {
-      msgEl.textContent = text;
-      setTimeout(() => msgEl.textContent = '', 2500);
+    // --- Inbox ---
+
+    async function renderInboxGroupSelect() {
+      const sel = document.getElementById('inbox-select');
+      const current = document.getElementById('inbox-current');
+      const { jid } = await fetch('/config/inbox').then(r => r.json());
+
+      sel.innerHTML = '<option value="">— escolha um grupo —</option>';
+      groupsCache.forEach(g => {
+        const opt = document.createElement('option');
+        opt.value = g.id;
+        opt.textContent = g.name;
+        if (g.id === jid) opt.selected = true;
+        sel.appendChild(opt);
+      });
+
+      const found = groupsCache.find(g => g.id === jid);
+      current.textContent = found ? found.name : (jid || 'não configurado');
     }
 
-    // Groq API Key
+    document.getElementById('inbox-save').onclick = async () => {
+      const jid = document.getElementById('inbox-select').value;
+      await fetch('/config/inbox', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ jid }) });
+      await renderInboxGroupSelect();
+      flash(jid ? '✓ caixa de entrada salva' : '✗ caixa de entrada removida');
+    };
+
+    // --- Senders ---
+
+    async function renderSenders() {
+      const list = await fetch('/senders').then(r => r.json());
+      const el = document.getElementById('senders-list');
+      el.innerHTML = '';
+      if (list.length === 0) {
+        el.innerHTML = '<div style="font-size:0.8rem;opacity:0.4;padding:4px">Nenhum remetente monitorado</div>';
+        return;
+      }
+      list.forEach(s => {
+        const row = document.createElement('div');
+        row.className = 'row';
+        row.innerHTML = `
+          <div class="group-info">
+            <span class="group-name">${s.name}</span>
+            <span class="group-id">${s.jid}</span>
+          </div>
+          <button class="danger" data-jid="${s.jid}">remover</button>`;
+        row.querySelector('button').onclick = async () => {
+          await fetch(`/senders/${encodeURIComponent(s.jid)}`, { method: 'DELETE' });
+          flash(`✗ removido: ${s.name}`);
+          renderSenders();
+        };
+        el.appendChild(row);
+      });
+    }
+
+    document.getElementById('sender-add').onclick = async () => {
+      const name = document.getElementById('sender-name').value.trim();
+      const phone = document.getElementById('sender-phone').value.trim().replace(/\D/g, '');
+      if (!phone) { flash('informe o número'); return; }
+      const jid = `${phone}@s.whatsapp.net`;
+      await fetch('/senders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ jid, name: name || phone }) });
+      document.getElementById('sender-name').value = '';
+      document.getElementById('sender-phone').value = '';
+      flash(`✓ adicionado: ${name || phone}`);
+      renderSenders();
+    };
+
+    // --- Groq API Key ---
+
     const groqStatus = document.getElementById('groq-status');
     const groqInput = document.getElementById('groq-input');
-    const groqSave = document.getElementById('groq-save');
 
     fetch('/config/groq-key').then(r => r.json()).then(d => {
       groqStatus.textContent = d.set ? '✓ configurada' : '✗ não configurada';
       groqStatus.style.color = d.set ? '#4caf50' : '#f44336';
     });
 
-    groqSave.onclick = async () => {
+    document.getElementById('groq-save').onclick = async () => {
       const key = groqInput.value.trim();
       await fetch('/config/groq-key', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key }) });
       groqInput.value = '';
@@ -184,6 +273,11 @@
       groqStatus.style.color = d.set ? '#4caf50' : '#f44336';
       flash(key ? '✓ Groq API Key salva' : '✗ Groq API Key removida');
     };
+
+    function flash(text) {
+      msgEl.textContent = text;
+      setTimeout(() => msgEl.textContent = '', 2500);
+    }
 
     refresh();
     setInterval(refresh, 3000);

@@ -22,6 +22,10 @@ db.exec(`
     key TEXT PRIMARY KEY,
     value TEXT NOT NULL
   );
+  CREATE TABLE IF NOT EXISTS transcribe_senders (
+    jid TEXT PRIMARY KEY,
+    name TEXT NOT NULL
+  );
 `);
 
 module.exports = db;
