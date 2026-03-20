@@ -66,10 +66,12 @@ async function connect() {
   sock.ev.on('creds.update', saveCreds);
 
   sock.ev.on('contacts.set', ({ contacts }) => {
+    console.log(`[zap] contacts.set count=${contacts?.length} sample=${JSON.stringify(contacts?.slice(0,2))}`);
     if (onContacts) onContacts(contacts);
   });
 
   sock.ev.on('contacts.update', (updates) => {
+    console.log(`[zap] contacts.update count=${updates?.length} sample=${JSON.stringify(updates?.slice(0,2))}`);
     if (onContacts) onContacts(updates);
   });
 
