@@ -37,7 +37,8 @@ async function getGroups() {
     return Object.values(groups)
       .map((g) => ({ id: g.id, name: g.subject }))
       .sort((a, b) => a.name.localeCompare(b.name));
-  } catch {
+  } catch (err) {
+    console.error('[zap] erro ao buscar grupos:', err.message);
     return [];
   }
 }
