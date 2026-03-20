@@ -2,7 +2,7 @@ const { getGroqApiKey } = require('./config');
 
 async function transcribe(buffer, mimetype) {
   const apiKey = getGroqApiKey();
-  if (!apiKey) { console.error('[transcribe] GROQ_API_KEY não definida'); return null; }
+  if (!apiKey) return null;
 
   const ext = (mimetype || '').includes('ogg') ? 'ogg' : 'mp4';
   const form = new FormData();

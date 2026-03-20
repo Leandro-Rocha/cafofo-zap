@@ -65,7 +65,6 @@ async function connect() {
   sock.ev.on('creds.update', saveCreds);
 
   sock.ev.on('messages.upsert', async ({ messages, type }) => {
-    console.log(`[zap] messages.upsert type=${type} count=${messages.length}`);
     if (!onMessage) return;
     // 'notify': mensagens novas (de outros e próprias via multi-device)
     // 'append': mensagens próprias sincronizadas de volta pelo WhatsApp
@@ -80,17 +79,11 @@ async function connect() {
 
       const hasAudio = !!msg.message?.audioMessage;
       const senderJid = msg.key.participant ? jidNormalizedUser(msg.key.participant) : null;
-      console.log(`[zap] msg groupId=${groupId} fromMe=${fromMe} hasAudio=${hasAudio} senderJid=${senderJid} myJid=${myJid} type=${type}`);
-
       const isMySender = fromMe || senderJid === myJid || (myLid && senderJid === myLid);
-      console.log(`[zap] isMySender=${isMySender} fromMe=${fromMe} senderJid=${senderJid} myJid=${myJid} myLid=${myLid}`);
 
       // 'append' só interessa para áudio próprio (auto-transcrição)
       if (type === 'append') {
-        if (!hasAudio || !isMySender) {
-          console.log(`[zap] append ignorado: hasAudio=${hasAudio} isMySender=${isMySender}`);
-          continue;
-        }
+        if (!hasAudio || !isMySender) continue;
       }
 
       const sender = msg.pushName || msg.key.participant || groupId;
