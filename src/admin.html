@@ -351,6 +351,39 @@
     a.link-row:hover { background: var(--surface2); }
     a.link-row .chevron { color: var(--muted); }
 
+    /* ─── SEARCH ─── */
+    .search-wrap { margin-left: auto; }
+    .search-wrap input {
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      color: var(--text);
+      padding: 4px 8px;
+      border-radius: var(--r-sm);
+      font-size: 12px; outline: none;
+      font-family: inherit;
+      width: 110px;
+      transition: border-color .15s, box-shadow .15s, width .2s;
+    }
+    .search-wrap input:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(27,94,58,.1);
+      background: #fff;
+      width: 150px;
+    }
+
+    /* ─── COPY BUTTON ─── */
+    .copy-btn {
+      background: none; border: none; cursor: pointer;
+      padding: 4px 6px; border-radius: 5px;
+      color: var(--muted); font-size: 11px;
+      flex-shrink: 0;
+      transition: background .1s, color .1s;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      letter-spacing: 0;
+    }
+    .copy-btn:hover { background: var(--surface2); color: var(--text2); }
+    .copy-btn.copied { color: var(--green); }
+
     /* ─── TOAST ─── */
     #toast {
       position: fixed; bottom: 20px; left: 50%;
@@ -384,6 +417,7 @@
 
   <nav>
     <button class="tab active" data-page="status">Status</button>
+    <button class="tab" data-page="grupos">Grupos</button>
     <button class="tab" data-page="config">Ajustes</button>
   </nav>
 
@@ -404,6 +438,22 @@
       <div id="qr-card">
         <img id="qr" src="" alt="QR Code">
         <p>Abra o WhatsApp → Menu → Dispositivos vinculados → Vincular dispositivo</p>
+      </div>
+    </div>
+
+    <!-- ── GRUPOS ── -->
+    <div class="page" id="page-grupos">
+      <div class="card">
+        <div class="card-head">
+          <div class="ci ci-g">
+            <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+          </div>
+          <span class="card-title" id="grupos-title">Grupos</span>
+          <div class="search-wrap">
+            <input type="text" id="grupos-search" placeholder="Buscar…" autocomplete="off">
+          </div>
+        </div>
+        <div id="grupos-list"><div class="card-empty">Conecte o WhatsApp para listar os grupos</div></div>
       </div>
     </div>
 
@@ -446,6 +496,7 @@
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
       btn.classList.add('active');
       document.getElementById('page-' + btn.dataset.page).classList.add('active');
+      if (btn.dataset.page === 'grupos' && !gruposCache.length) loadGrupos();
     };
   });
 
@@ -461,6 +512,49 @@
 
   // ── State ──
   let lastStatus = null;
+  let gruposCache = [];
+
+  // ── Grupos ──
+  async function loadGrupos() {
+    const list = await fetch('/groups').then(r=>r.json()).catch(()=>[]);
+    gruposCache = list;
+    renderGrupos();
+  }
+
+  function renderGrupos(filter) {
+    const q = (filter ?? document.getElementById('grupos-search').value).toLowerCase().trim();
+    const filtered = q ? gruposCache.filter(g => g.name.toLowerCase().includes(q)) : gruposCache;
+    const title = document.getElementById('grupos-title');
+    title.textContent = q ? `${filtered.length} resultado${filtered.length !== 1 ? 's' : ''}` : `Grupos (${gruposCache.length})`;
+    const el = document.getElementById('grupos-list');
+    el.innerHTML = '';
+    if (!filtered.length) {
+      el.innerHTML = `<div class="card-empty">${gruposCache.length ? 'Nenhum resultado' : 'Conecte o WhatsApp para listar os grupos'}</div>`;
+      return;
+    }
+    filtered.forEach(g => {
+      const row = document.createElement('div');
+      row.className = 'row';
+      row.innerHTML = `
+        <div class="avatar" style="background:${avatarColor(g.name)}">${initials(g.name)}</div>
+        <div class="row-info">
+          <div class="row-name">${g.name}</div>
+          <div class="row-sub">${g.id}</div>
+        </div>
+        <button class="copy-btn" title="Copiar ID">ID</button>`;
+      const btn = row.querySelector('.copy-btn');
+      btn.onclick = () => {
+        navigator.clipboard.writeText(g.id).then(() => {
+          btn.textContent = '✓';
+          btn.classList.add('copied');
+          setTimeout(() => { btn.textContent = 'ID'; btn.classList.remove('copied'); }, 1500);
+        });
+      };
+      el.appendChild(row);
+    });
+  }
+
+  document.getElementById('grupos-search').addEventListener('input', e => renderGrupos(e.target.value));
 
   // ── Status ──
   async function refresh() {
@@ -485,6 +579,7 @@
       qr.classList.remove('show');
     }
 
+    if (s === 'connected' && lastStatus !== 'connected') loadGrupos();
     lastStatus = s;
   }
 
