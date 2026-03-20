@@ -1,6 +1,6 @@
 async function transcribe(buffer, mimetype) {
   const apiKey = process.env.GROQ_API_KEY;
-  if (!apiKey) return null;
+  if (!apiKey) { console.error('[transcribe] GROQ_API_KEY não definida'); return null; }
 
   const ext = (mimetype || '').includes('ogg') ? 'ogg' : 'mp4';
   const form = new FormData();
