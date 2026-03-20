@@ -64,7 +64,10 @@ async function connect() {
   sock.ev.on('creds.update', saveCreds);
 
   sock.ev.on('messages.upsert', async ({ messages, type }) => {
-    if (type !== 'notify' || !onMessage) return;
+    if (!onMessage) return;
+    // 'notify': mensagens novas (de outros e próprias via multi-device)
+    // 'append': mensagens próprias sincronizadas de volta pelo WhatsApp
+    if (type !== 'notify' && type !== 'append') return;
 
     for (const msg of messages) {
       const fromMe = !!msg.key.fromMe;
@@ -72,6 +75,9 @@ async function connect() {
 
       // só processa grupos
       if (!groupId || !groupId.endsWith('@g.us')) continue;
+
+      // 'append' só interessa para áudio próprio (auto-transcrição)
+      if (type === 'append' && !fromMe) continue;
 
       const sender = msg.pushName || msg.key.participant || groupId;
 
