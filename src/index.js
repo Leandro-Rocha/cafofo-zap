@@ -24,6 +24,14 @@ async function sendToInbox(label, text) {
 wa.setMessageHandler(async (event) => {
   const isMe = event.isMySender;
 
+  // Áudio em self-chat (Mensagens Salvas) → caixa de entrada
+  if (event.type === 'audio' && event.isSelfChat) {
+    const label = event.forwarded && event.originalSender ? event.originalSender : null;
+    const text = await transcribe(event.buffer, event.mimetype).catch((err) => { console.error('[transcribe] erro:', err.message); return null; });
+    if (text) await sendToInbox(label, text);
+    return;
+  }
+
   // Áudio próprio ou encaminhado em grupo habilitado → caixa de entrada
   if (event.type === 'audio' && isMe && autotranscribe.isEnabled(event.groupId)) {
     const label = event.forwarded ? event.originalSender : event.sender;

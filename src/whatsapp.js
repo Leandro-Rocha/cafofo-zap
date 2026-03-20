@@ -83,12 +83,13 @@ async function connect() {
       const fromMe = !!msg.key.fromMe;
       const groupId = msg.key.remoteJid;
 
-      // só processa grupos
-      if (!groupId || !groupId.endsWith('@g.us')) continue;
+      // processa grupos e self-chat (Mensagens Salvas)
+      const isSelfChat = groupId && (groupId === myJid || groupId === myLid);
+      if (!groupId || (!groupId.endsWith('@g.us') && !isSelfChat)) continue;
 
       const hasAudio = !!msg.message?.audioMessage;
       const senderJid = msg.key.participant ? jidNormalizedUser(msg.key.participant) : null;
-      const isMySender = fromMe || senderJid === myJid || (myLid && senderJid === myLid);
+      const isMySender = fromMe || senderJid === myJid || (myLid && senderJid === myLid) || isSelfChat;
 
       // 'append' só interessa para áudio próprio (auto-transcrição)
       if (type === 'append') {
@@ -118,7 +119,7 @@ async function connect() {
             logger: pino({ level: 'silent' }),
             reuploadRequest: sock.updateMediaMessage,
           });
-          await onMessage({ type: 'audio', groupId, sender, senderJid, buffer, mimetype: audioMsg.mimetype, fromMe, isMySender, forwarded, originalSender, raw: msg });
+          await onMessage({ type: 'audio', groupId, sender, senderJid, buffer, mimetype: audioMsg.mimetype, fromMe, isMySender, isSelfChat, forwarded, originalSender, raw: msg });
         } catch (err) {
           console.error('[zap] erro ao baixar áudio:', err.message);
         }
