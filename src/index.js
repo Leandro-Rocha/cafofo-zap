@@ -51,15 +51,12 @@ wa.setMessageHandler(async (event) => {
 });
 
 wa.setContactsHandler((contacts) => {
-  let saved = 0;
   for (const c of contacts) {
     const name = c.notify || c.verifiedName || c.name;
-    if (c.id && name && c.id.endsWith('@s.whatsapp.net')) {
+    if (c.id && name && (c.id.endsWith('@s.whatsapp.net') || c.id.endsWith('@lid'))) {
       senders.trackSeen(c.id, name);
-      saved++;
     }
   }
-  console.log(`[contacts] recebidos=${contacts.length} salvos=${saved}`);
 });
 
 wa.connect().catch((err) => console.error('[zap] falha ao conectar:', err.message));
