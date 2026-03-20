@@ -6,273 +6,331 @@
   <title>Cafofo Zap</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: sans-serif; background: #111; color: #eee; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; gap: 16px; padding: 24px; }
-    h1 { font-size: 1.2rem; opacity: 0.6; }
-    #status { font-size: 1rem; padding: 6px 16px; border-radius: 20px; background: #222; }
-    #status.connected { background: #1a3a1a; color: #4caf50; }
-    #status.connecting { background: #3a2a00; color: #ffc107; }
-    #status.disconnected { background: #3a1a1a; color: #f44336; }
-    #qr-box { background: #fff; padding: 16px; border-radius: 12px; display: none; }
-    #qr-box img { display: block; width: 240px; height: 240px; }
-    .section { width: 100%; max-width: 420px; display: none; flex-direction: column; gap: 8px; }
-    .section h2 { font-size: 0.85rem; opacity: 0.5; text-transform: uppercase; letter-spacing: 1px; }
-    .row { background: #1e1e1e; border-radius: 8px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-    .group-info { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; cursor: pointer; }
-    .group-info:hover .group-name { opacity: 0.8; }
-    .group-name { font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .group-id { font-size: 0.7rem; opacity: 0.4; font-family: monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    /* toggle switch */
+
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f2f5; color: #1a1a1a; min-height: 100vh; }
+
+    /* Layout */
+    #app { display: flex; flex-direction: column; min-height: 100vh; max-width: 560px; margin: 0 auto; }
+
+    /* Header */
+    header { background: #fff; border-bottom: 1px solid #e8e8e8; padding: 0 20px; display: flex; align-items: center; gap: 12px; height: 56px; position: sticky; top: 0; z-index: 10; }
+    header h1 { font-size: 1rem; font-weight: 600; color: #1a1a1a; flex: 1; }
+    #wa-badge { font-size: 0.75rem; font-weight: 500; padding: 3px 10px; border-radius: 20px; background: #f0f0f0; color: #888; }
+    #wa-badge.connected { background: #e8f5e9; color: #2e7d32; }
+    #wa-badge.connecting { background: #fff8e1; color: #f57f17; }
+    #wa-badge.disconnected { background: #fce4ec; color: #c62828; }
+
+    /* Nav */
+    nav { background: #fff; border-bottom: 1px solid #e8e8e8; display: flex; padding: 0 20px; }
+    nav button { background: none; border: none; padding: 14px 16px; font-size: 0.85rem; font-weight: 500; color: #888; cursor: pointer; border-bottom: 2px solid transparent; transition: color 0.15s, border-color 0.15s; }
+    nav button:hover { color: #333; }
+    nav button.active { color: #2e7d32; border-bottom-color: #2e7d32; }
+
+    /* Content */
+    main { flex: 1; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+    .page { display: none; flex-direction: column; gap: 16px; }
+    .page.active { display: flex; }
+
+    /* Cards */
+    .card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.06); overflow: hidden; }
+    .card-title { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .6px; color: #888; padding: 14px 16px 10px; border-bottom: 1px solid #f0f0f0; }
+    .card-empty { padding: 16px; font-size: 0.85rem; color: #aaa; text-align: center; }
+
+    /* Rows */
+    .row { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid #f5f5f5; }
+    .row:last-child { border-bottom: none; }
+    .row-info { flex: 1; min-width: 0; }
+    .row-name { font-size: 0.9rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .row-sub { font-size: 0.72rem; color: #aaa; font-family: monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
+
+    /* Toggle */
     .toggle { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
     .toggle input { opacity: 0; width: 0; height: 0; }
-    .slider { position: absolute; inset: 0; background: #333; border-radius: 22px; cursor: pointer; transition: background 0.2s; }
-    .slider:before { content: ''; position: absolute; width: 16px; height: 16px; left: 3px; top: 3px; background: #eee; border-radius: 50%; transition: transform 0.2s; }
+    .slider { position: absolute; inset: 0; background: #ddd; border-radius: 22px; cursor: pointer; transition: background 0.2s; }
+    .slider:before { content: ''; position: absolute; width: 16px; height: 16px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
     input:checked + .slider { background: #4caf50; }
     input:checked + .slider:before { transform: translateX(18px); }
-    input[type=text], input[type=password] { background: #111; border: 1px solid #444; color: #eee; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; }
-    select { background: #111; border: 1px solid #444; color: #eee; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; flex: 1; }
-    button { background: #333; border: none; color: #ccc; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
-    button:hover { background: #444; }
-    button.primary { background: #2a4a2a; color: #4caf50; }
-    button.danger { background: #4a1a1a; color: #f44336; }
-    #msg { font-size: 0.8rem; opacity: 0.4; }
+
+    /* Inputs */
+    .form-row { display: flex; gap: 8px; padding: 12px 16px; align-items: center; border-top: 1px solid #f0f0f0; flex-wrap: wrap; }
+    input[type=text], input[type=password], select {
+      background: #f7f7f7; border: 1px solid #e0e0e0; color: #1a1a1a;
+      padding: 7px 10px; border-radius: 8px; font-size: 0.85rem; outline: none;
+      transition: border-color 0.15s;
+    }
+    input:focus, select:focus { border-color: #4caf50; }
+    select { flex: 1; }
+
+    /* Buttons */
+    .btn { border: none; padding: 7px 14px; border-radius: 8px; font-size: 0.85rem; font-weight: 500; cursor: pointer; transition: opacity 0.15s; }
+    .btn:hover { opacity: 0.85; }
+    .btn-primary { background: #4caf50; color: #fff; }
+    .btn-danger { background: #ffebee; color: #c62828; }
+    .btn-ghost { background: #f0f0f0; color: #555; }
+
+    /* QR */
+    #qr-box { display: none; align-items: center; justify-content: center; padding: 24px; }
+    #qr-box img { width: 200px; height: 200px; border-radius: 8px; }
+
+    /* Status page */
+    .status-info { display: flex; flex-direction: column; gap: 6px; padding: 16px; }
+    .status-line { display: flex; justify-content: space-between; font-size: 0.85rem; }
+    .status-line span:first-child { color: #888; }
+
+    /* Toast */
+    #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #333; color: #fff; padding: 8px 18px; border-radius: 20px; font-size: 0.82rem; opacity: 0; transition: opacity 0.2s; pointer-events: none; white-space: nowrap; }
+    #toast.show { opacity: 1; }
   </style>
 </head>
 <body>
-  <h1>Cafofo Zap</h1>
-  <div id="status">carregando...</div>
-  <div id="qr-box"><img id="qr" src="" alt="QR Code"></div>
+<div id="app">
+  <header>
+    <h1>Cafofo Zap</h1>
+    <span id="wa-badge">carregando</span>
+  </header>
 
-  <div id="groups" class="section">
-    <h2>Grupos</h2>
-    <div id="groups-list"></div>
-  </div>
+  <nav>
+    <button class="active" data-page="status">Status</button>
+    <button data-page="transcricoes">Transcrições</button>
+    <button data-page="config">Ajustes</button>
+  </nav>
 
-  <!-- Caixa de transcrição -->
-  <div id="inbox-section" class="section">
-    <h2>Caixa de transcrição</h2>
-    <div class="row" style="gap:8px; flex-wrap:wrap;">
-      <span style="font-size:0.85rem;width:100%">Destino das transcrições</span>
-      <select id="inbox-select"><option value="">— escolha um grupo —</option></select>
-      <button class="primary" id="inbox-save">salvar</button>
+  <main>
+
+    <!-- Status -->
+    <div class="page active" id="page-status">
+      <div class="card">
+        <div id="qr-box"><img id="qr" src="" alt="QR Code"></div>
+        <div class="status-info" id="status-info"></div>
+      </div>
     </div>
-    <div style="font-size:0.8rem; opacity:0.5; padding: 0 4px">Destino atual: <span id="inbox-current">não configurado</span></div>
 
-    <h2 style="margin-top:8px">Remetentes monitorados</h2>
-    <div id="senders-list"></div>
-    <div style="font-size:0.75rem;opacity:0.4;padding:0 4px">Remetentes aparecem automaticamente conforme enviam mensagens nos grupos.</div>
-  </div>
+    <!-- Transcrições -->
+    <div class="page" id="page-transcricoes">
 
-  <!-- Grupos para encaminhamento -->
-  <div id="autotranscribe-section" class="section">
-    <h2>Encaminhamento de áudio</h2>
-    <div id="autotranscribe-list"></div>
-  </div>
+      <div class="card">
+        <div class="card-title">Destino das transcrições</div>
+        <div class="form-row">
+          <select id="inbox-select"><option value="">— escolha um grupo —</option></select>
+          <button class="btn btn-primary" id="inbox-save">Salvar</button>
+        </div>
+        <div class="row" style="padding-top:0; border:none;">
+          <span style="font-size:0.8rem;color:#aaa">Atual: </span>
+          <span style="font-size:0.8rem;font-weight:500" id="inbox-current">não configurado</span>
+        </div>
+      </div>
 
-  <!-- Configuração -->
-  <div id="config-section" class="section" style="display:flex;">
-    <h2>Configuração</h2>
-    <div class="row" style="gap:8px;">
-      <span style="font-size:0.85rem;flex:1">Groq API Key</span>
-      <span id="groq-status" style="font-size:0.75rem;opacity:0.5">...</span>
-      <input id="groq-input" type="password" placeholder="gsk_..." style="width:180px;">
-      <button class="primary" id="groq-save">salvar</button>
+      <div class="card">
+        <div class="card-title">Remetentes monitorados</div>
+        <div id="senders-list"></div>
+        <div style="font-size:0.75rem;color:#bbb;padding:10px 16px">Aparecem automaticamente conforme enviam mensagens.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Encaminhar áudio para transcrever</div>
+        <div id="autotranscribe-list"></div>
+      </div>
+
     </div>
-  </div>
 
-  <div id="msg"></div>
+    <!-- Ajustes -->
+    <div class="page" id="page-config">
+      <div class="card">
+        <div class="card-title">Groq API Key</div>
+        <div class="form-row">
+          <input type="password" id="groq-input" placeholder="gsk_..." style="flex:1">
+          <button class="btn btn-primary" id="groq-save">Salvar</button>
+        </div>
+        <div class="row" style="border:none;">
+          <span style="font-size:0.8rem;color:#aaa">Status: </span>
+          <span id="groq-status" style="font-size:0.8rem;font-weight:500">...</span>
+        </div>
+      </div>
 
-  <script>
-    const statusEl = document.getElementById('status');
+      <div class="card">
+        <div class="card-title">Links</div>
+        <div class="row"><a href="/logs" style="font-size:0.85rem;color:#4caf50;text-decoration:none">Ver logs em tempo real →</a></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  // --- Nav ---
+  const navBtns = document.querySelectorAll('nav button');
+  navBtns.forEach(btn => {
+    btn.onclick = () => {
+      navBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById('page-' + btn.dataset.page).classList.add('active');
+    };
+  });
+
+  // --- State ---
+  let groupsCache = [];
+  let enabledCache = new Set();
+  let lastStatus = null;
+
+  // --- Status page ---
+  async function refresh() {
+    const data = await fetch('/status').then(r => r.json()).catch(() => ({ status: 'disconnected', qr: null }));
+    const badge = document.getElementById('wa-badge');
+    badge.textContent = data.status;
+    badge.className = data.status;
+
     const qrBox = document.getElementById('qr-box');
     const qrImg = document.getElementById('qr');
-    const groupsEl = document.getElementById('groups');
-    const groupsList = document.getElementById('groups-list');
-    const atSection = document.getElementById('autotranscribe-section');
-    const atList = document.getElementById('autotranscribe-list');
-    const inboxSection = document.getElementById('inbox-section');
-    const msgEl = document.getElementById('msg');
-
-    let groupsCache = [];
-    let enabledCache = new Set();
-    let lastStatus = null;
-
-    async function refresh() {
-      const data = await fetch('/status').then(r => r.json());
-      statusEl.textContent = data.status;
-      statusEl.className = data.status;
-
-      if (data.qr) {
-        qrImg.src = data.qr;
-        qrBox.style.display = 'block';
-        groupsEl.style.display = 'none';
-        atSection.style.display = 'none';
-        inboxSection.style.display = 'none';
-      } else {
-        qrBox.style.display = 'none';
-      }
-
-      if (data.status === 'connected') {
-        groupsEl.style.display = 'flex';
-        atSection.style.display = 'flex';
-        inboxSection.style.display = 'flex';
-        if (lastStatus !== 'connected') loadGroups();
-      }
-
-      lastStatus = data.status;
+    if (data.qr) {
+      qrImg.src = data.qr;
+      qrBox.style.display = 'flex';
+    } else {
+      qrBox.style.display = 'none';
     }
 
-    async function loadGroups() {
-      const [groups, enabled] = await Promise.all([
-        fetch('/groups').then(r => r.json()),
-        fetch('/autotranscribe').then(r => r.json()),
-      ]);
-      groupsCache = groups;
-      enabledCache = new Set(enabled);
-      renderGroups();
-      renderAutotranscribe();
-      renderInboxGroupSelect();
-      renderSenders();
-    }
+    const info = document.getElementById('status-info');
+    info.innerHTML = `
+      <div class="status-line"><span>Conexão</span><span>${data.status}</span></div>
+    `;
 
-    function renderGroups() {
-      groupsList.innerHTML = '';
-      groupsCache.forEach(g => {
-        const el = document.createElement('div');
-        el.className = 'row';
-        el.innerHTML = `<div class="group-info">
-          <span class="group-name">${g.name}</span>
-          <span class="group-id">${g.id}</span>
-        </div>`;
-        el.querySelector('.group-info').onclick = () => {
-          navigator.clipboard.writeText(g.id);
-          flash(`✓ copiado: ${g.id}`);
-        };
-        groupsList.appendChild(el);
-      });
-    }
+    if (data.status === 'connected' && lastStatus !== 'connected') loadGroups();
+    lastStatus = data.status;
+  }
 
-    function renderAutotranscribe() {
-      atList.innerHTML = '';
-      groupsCache.forEach(g => {
-        const checked = enabledCache.has(g.id);
-        const el = document.createElement('div');
-        el.className = 'row';
-        el.innerHTML = `
-          <div class="group-info">
-            <span class="group-name">${g.name}</span>
-            <span class="group-id">${g.id}</span>
-          </div>
-          <label class="toggle">
-            <input type="checkbox" ${checked ? 'checked' : ''}>
-            <span class="slider"></span>
-          </label>`;
-        const checkbox = el.querySelector('input');
-        checkbox.onchange = async () => {
-          const id = encodeURIComponent(g.id);
-          if (checkbox.checked) {
-            await fetch(`/autotranscribe/${id}`, { method: 'POST' });
-            enabledCache.add(g.id);
-            flash(`✓ encaminhamento ativado: ${g.name}`);
-          } else {
-            await fetch(`/autotranscribe/${id}`, { method: 'DELETE' });
-            enabledCache.delete(g.id);
-            flash(`✗ encaminhamento desativado: ${g.name}`);
-          }
-        };
-        atList.appendChild(el);
-      });
-    }
+  // --- Groups data ---
+  async function loadGroups() {
+    const [groups, enabled] = await Promise.all([
+      fetch('/groups').then(r => r.json()),
+      fetch('/autotranscribe').then(r => r.json()),
+    ]);
+    groupsCache = groups;
+    enabledCache = new Set(enabled);
+    renderAutotranscribe();
+    renderInboxSelect();
+    renderSenders();
+  }
 
-    // --- Inbox ---
-
-    async function renderInboxGroupSelect() {
-      const sel = document.getElementById('inbox-select');
-      const current = document.getElementById('inbox-current');
-      const { jid } = await fetch('/config/inbox').then(r => r.json());
-
-      sel.innerHTML = '<option value="">— escolha um grupo —</option>';
-      groupsCache.forEach(g => {
-        const opt = document.createElement('option');
-        opt.value = g.id;
-        opt.textContent = g.name;
-        if (g.id === jid) opt.selected = true;
-        sel.appendChild(opt);
-      });
-
-      const found = groupsCache.find(g => g.id === jid);
-      current.textContent = found ? found.name : (jid || 'não configurado');
-    }
-
-    document.getElementById('inbox-save').onclick = async () => {
-      const jid = document.getElementById('inbox-select').value;
-      await fetch('/config/inbox', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ jid }) });
-      await renderInboxGroupSelect();
-      flash(jid ? '✓ caixa de entrada salva' : '✗ caixa de entrada removida');
-    };
-
-    // --- Senders ---
-
-    async function renderSenders() {
-      const list = await fetch('/senders').then(r => r.json());
-      const el = document.getElementById('senders-list');
-      el.innerHTML = '';
-      if (list.length === 0) {
-        el.innerHTML = '<div style="font-size:0.8rem;opacity:0.4;padding:4px">Nenhuma mensagem recebida ainda.</div>';
-        return;
-      }
-      list.forEach(s => {
-        const row = document.createElement('div');
-        row.className = 'row';
-        row.innerHTML = `
-          <div class="group-info">
-            <span class="group-name">${s.name}</span>
-            <span class="group-id">${s.jid}</span>
-          </div>
-          <label class="toggle">
-            <input type="checkbox" ${s.monitored ? 'checked' : ''}>
-            <span class="slider"></span>
-          </label>`;
-        const checkbox = row.querySelector('input');
-        checkbox.onchange = async () => {
-          if (checkbox.checked) {
-            await fetch('/senders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ jid: s.jid, name: s.name }) });
-            flash(`✓ monitorando: ${s.name}`);
-          } else {
-            await fetch(`/senders/${encodeURIComponent(s.jid)}`, { method: 'DELETE' });
-            flash(`✗ removido: ${s.name}`);
-          }
-        };
-        el.appendChild(row);
-      });
-    }
-
-    // --- Groq API Key ---
-
-    const groqStatus = document.getElementById('groq-status');
-    const groqInput = document.getElementById('groq-input');
-
-    fetch('/config/groq-key').then(r => r.json()).then(d => {
-      groqStatus.textContent = d.set ? '✓ configurada' : '✗ não configurada';
-      groqStatus.style.color = d.set ? '#4caf50' : '#f44336';
+  // --- Autotranscribe ---
+  function renderAutotranscribe() {
+    const el = document.getElementById('autotranscribe-list');
+    el.innerHTML = '';
+    if (!groupsCache.length) { el.innerHTML = '<div class="card-empty">Nenhum grupo disponível</div>'; return; }
+    groupsCache.forEach(g => {
+      const row = document.createElement('div');
+      row.className = 'row';
+      row.innerHTML = `
+        <div class="row-info">
+          <div class="row-name">${g.name}</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" ${enabledCache.has(g.id) ? 'checked' : ''}>
+          <span class="slider"></span>
+        </label>`;
+      const cb = row.querySelector('input');
+      cb.onchange = async () => {
+        const id = encodeURIComponent(g.id);
+        if (cb.checked) {
+          await fetch(`/autotranscribe/${id}`, { method: 'POST' });
+          enabledCache.add(g.id);
+          toast(`Ativado: ${g.name}`);
+        } else {
+          await fetch(`/autotranscribe/${id}`, { method: 'DELETE' });
+          enabledCache.delete(g.id);
+          toast(`Desativado: ${g.name}`);
+        }
+      };
+      el.appendChild(row);
     });
+  }
 
-    document.getElementById('groq-save').onclick = async () => {
-      const key = groqInput.value.trim();
-      await fetch('/config/groq-key', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key }) });
-      groqInput.value = '';
-      const d = await fetch('/config/groq-key').then(r => r.json());
-      groqStatus.textContent = d.set ? '✓ configurada' : '✗ não configurada';
-      groqStatus.style.color = d.set ? '#4caf50' : '#f44336';
-      flash(key ? '✓ Groq API Key salva' : '✗ Groq API Key removida');
-    };
+  // --- Inbox ---
+  async function renderInboxSelect() {
+    const sel = document.getElementById('inbox-select');
+    const cur = document.getElementById('inbox-current');
+    const { jid } = await fetch('/config/inbox').then(r => r.json());
+    sel.innerHTML = '<option value="">— escolha um grupo —</option>';
+    groupsCache.forEach(g => {
+      const o = document.createElement('option');
+      o.value = g.id; o.textContent = g.name;
+      if (g.id === jid) o.selected = true;
+      sel.appendChild(o);
+    });
+    const found = groupsCache.find(g => g.id === jid);
+    cur.textContent = found ? found.name : (jid || 'não configurado');
+  }
 
-    function flash(text) {
-      msgEl.textContent = text;
-      setTimeout(() => msgEl.textContent = '', 2500);
-    }
+  document.getElementById('inbox-save').onclick = async () => {
+    const jid = document.getElementById('inbox-select').value;
+    await fetch('/config/inbox', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ jid }) });
+    await renderInboxSelect();
+    toast(jid ? 'Destino salvo' : 'Destino removido');
+  };
 
-    refresh();
-    setInterval(refresh, 3000);
-  </script>
+  // --- Senders ---
+  async function renderSenders() {
+    const list = await fetch('/senders').then(r => r.json());
+    const el = document.getElementById('senders-list');
+    el.innerHTML = '';
+    if (!list.length) { el.innerHTML = '<div class="card-empty">Nenhuma mensagem recebida ainda</div>'; return; }
+    list.forEach(s => {
+      const row = document.createElement('div');
+      row.className = 'row';
+      row.innerHTML = `
+        <div class="row-info">
+          <div class="row-name">${s.name}</div>
+          <div class="row-sub">${s.jid}</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" ${s.monitored ? 'checked' : ''}>
+          <span class="slider"></span>
+        </label>`;
+      const cb = row.querySelector('input');
+      cb.onchange = async () => {
+        if (cb.checked) {
+          await fetch('/senders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ jid: s.jid, name: s.name }) });
+          toast(`Monitorando: ${s.name}`);
+        } else {
+          await fetch(`/senders/${encodeURIComponent(s.jid)}`, { method: 'DELETE' });
+          toast(`Removido: ${s.name}`);
+        }
+      };
+      el.appendChild(row);
+    });
+  }
+
+  // --- Groq ---
+  async function loadGroqStatus() {
+    const { set } = await fetch('/config/groq-key').then(r => r.json());
+    const el = document.getElementById('groq-status');
+    el.textContent = set ? 'Configurada' : 'Não configurada';
+    el.style.color = set ? '#2e7d32' : '#c62828';
+  }
+
+  document.getElementById('groq-save').onclick = async () => {
+    const key = document.getElementById('groq-input').value.trim();
+    await fetch('/config/groq-key', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key }) });
+    document.getElementById('groq-input').value = '';
+    await loadGroqStatus();
+    toast(key ? 'API Key salva' : 'API Key removida');
+  };
+
+  // --- Toast ---
+  let toastTimer;
+  function toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
+  }
+
+  // --- Init ---
+  loadGroqStatus();
+  refresh();
+  setInterval(refresh, 3000);
+</script>
 </body>
 </html>
