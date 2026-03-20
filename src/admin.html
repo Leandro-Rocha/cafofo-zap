@@ -5,94 +5,307 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cafofo Zap</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --green: #16a34a;
+      --green-light: #dcfce7;
+      --green-dark: #15803d;
+      --red: #dc2626;
+      --red-light: #fee2e2;
+      --amber: #d97706;
+      --amber-light: #fef3c7;
+      --bg: #f1f5f9;
+      --surface: #ffffff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --muted: #94a3b8;
+      --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+      --shadow-md: 0 4px 16px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
+      --radius: 14px;
+      --radius-sm: 8px;
+    }
 
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f2f5; color: #1a1a1a; min-height: 100vh; }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html { font-size: 16px; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
-    /* Layout */
-    #app { display: flex; flex-direction: column; min-height: 100vh; max-width: 560px; margin: 0 auto; }
+    #app { max-width: 480px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; }
 
-    /* Header */
-    header { background: #fff; border-bottom: 1px solid #e8e8e8; padding: 0 20px; display: flex; align-items: center; gap: 12px; height: 56px; position: sticky; top: 0; z-index: 10; }
-    header h1 { font-size: 1rem; font-weight: 600; color: #1a1a1a; flex: 1; }
-    #wa-badge { font-size: 0.75rem; font-weight: 500; padding: 3px 10px; border-radius: 20px; background: #f0f0f0; color: #888; }
-    #wa-badge.connected { background: #e8f5e9; color: #2e7d32; }
-    #wa-badge.connecting { background: #fff8e1; color: #f57f17; }
-    #wa-badge.disconnected { background: #fce4ec; color: #c62828; }
+    /* ── Header ── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 20px;
+      height: 58px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+    .logo { display: flex; align-items: center; gap: 8px; flex: 1; }
+    .logo-icon { width: 30px; height: 30px; background: var(--green); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+    .logo-icon svg { width: 18px; height: 18px; fill: white; }
+    .logo-name { font-size: 0.95rem; font-weight: 700; letter-spacing: -.3px; }
 
-    /* Nav */
-    nav { background: #fff; border-bottom: 1px solid #e8e8e8; display: flex; padding: 0 20px; }
-    nav button { background: none; border: none; padding: 14px 16px; font-size: 0.85rem; font-weight: 500; color: #888; cursor: pointer; border-bottom: 2px solid transparent; transition: color 0.15s, border-color 0.15s; }
-    nav button:hover { color: #333; }
-    nav button.active { color: #2e7d32; border-bottom-color: #2e7d32; }
+    .badge {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+      letter-spacing: .2px;
+      transition: all .3s;
+    }
+    .badge.connected { background: var(--green-light); color: var(--green-dark); }
+    .badge.connecting { background: var(--amber-light); color: var(--amber); animation: pulse 1.5s infinite; }
+    .badge.disconnected { background: var(--red-light); color: var(--red); }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }
 
-    /* Content */
-    main { flex: 1; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
-    .page { display: none; flex-direction: column; gap: 16px; }
+    /* ── Tabs ── */
+    nav {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      position: sticky;
+      top: 58px;
+      z-index: 19;
+    }
+    .tab {
+      flex: 1;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      padding: 13px 0;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--muted);
+      cursor: pointer;
+      transition: color .15s, border-color .15s;
+    }
+    .tab.active { color: var(--green); border-bottom-color: var(--green); }
+    .tab:hover:not(.active) { color: var(--text); }
+
+    /* ── Content ── */
+    main { flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+    .page { display: none; flex-direction: column; gap: 12px; }
     .page.active { display: flex; }
 
-    /* Cards */
-    .card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.06); overflow: hidden; }
-    .card-title { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .6px; color: #888; padding: 14px 16px 10px; border-bottom: 1px solid #f0f0f0; }
-    .card-empty { padding: 16px; font-size: 0.85rem; color: #aaa; text-align: center; }
+    /* ── Cards ── */
+    .card { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
 
-    /* Rows */
-    .row { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid #f5f5f5; }
-    .row:last-child { border-bottom: none; }
-    .row-info { flex: 1; min-width: 0; }
-    .row-name { font-size: 0.9rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .row-sub { font-size: 0.72rem; color: #aaa; font-family: monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
-
-    /* Toggle */
-    .toggle { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
-    .toggle input { opacity: 0; width: 0; height: 0; }
-    .slider { position: absolute; inset: 0; background: #ddd; border-radius: 22px; cursor: pointer; transition: background 0.2s; }
-    .slider:before { content: ''; position: absolute; width: 16px; height: 16px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
-    input:checked + .slider { background: #4caf50; }
-    input:checked + .slider:before { transform: translateX(18px); }
-
-    /* Inputs */
-    .form-row { display: flex; gap: 8px; padding: 12px 16px; align-items: center; border-top: 1px solid #f0f0f0; flex-wrap: wrap; }
-    input[type=text], input[type=password], select {
-      background: #f7f7f7; border: 1px solid #e0e0e0; color: #1a1a1a;
-      padding: 7px 10px; border-radius: 8px; font-size: 0.85rem; outline: none;
-      transition: border-color 0.15s;
+    .card-header {
+      padding: 14px 16px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid #f8fafc;
     }
-    input:focus, select:focus { border-color: #4caf50; }
-    select { flex: 1; }
+    .card-header-icon { width: 28px; height: 28px; border-radius: 7px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .card-header-icon svg { width: 15px; height: 15px; }
+    .card-header-icon.green { background: var(--green-light); }
+    .card-header-icon.green svg { fill: var(--green); }
+    .card-header-icon.blue { background: #dbeafe; }
+    .card-header-icon.blue svg { fill: #1d4ed8; }
+    .card-header-icon.purple { background: #ede9fe; }
+    .card-header-icon.purple svg { fill: #7c3aed; }
+    .card-header-icon.amber { background: var(--amber-light); }
+    .card-header-icon.amber svg { fill: var(--amber); }
+    .card-title { font-size: 0.82rem; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: .5px; }
 
-    /* Buttons */
-    .btn { border: none; padding: 7px 14px; border-radius: 8px; font-size: 0.85rem; font-weight: 500; cursor: pointer; transition: opacity 0.15s; }
-    .btn:hover { opacity: 0.85; }
-    .btn-primary { background: #4caf50; color: #fff; }
-    .btn-danger { background: #ffebee; color: #c62828; }
-    .btn-ghost { background: #f0f0f0; color: #555; }
+    .card-empty { padding: 24px 16px; text-align: center; color: var(--muted); font-size: 0.84rem; }
 
-    /* QR */
-    #qr-box { display: none; align-items: center; justify-content: center; padding: 24px; }
-    #qr-box img { width: 200px; height: 200px; border-radius: 8px; }
+    /* ── Rows ── */
+    .row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      border-bottom: 1px solid #f8fafc;
+      transition: background .1s;
+    }
+    .row:last-child { border-bottom: none; }
 
-    /* Status page */
-    .status-info { display: flex; flex-direction: column; gap: 6px; padding: 16px; }
-    .status-line { display: flex; justify-content: space-between; font-size: 0.85rem; }
-    .status-line span:first-child { color: #888; }
+    .avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem; font-weight: 700;
+      color: white;
+      flex-shrink: 0;
+    }
 
-    /* Toast */
-    #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #333; color: #fff; padding: 8px 18px; border-radius: 20px; font-size: 0.82rem; opacity: 0; transition: opacity 0.2s; pointer-events: none; white-space: nowrap; }
-    #toast.show { opacity: 1; }
+    .row-info { flex: 1; min-width: 0; }
+    .row-name { font-size: 0.88rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .row-sub { font-size: 0.72rem; color: var(--muted); font-family: 'SF Mono', 'Fira Code', monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+
+    /* ── Toggle ── */
+    .toggle { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; inset: 0;
+      background: #d1d5db;
+      border-radius: 24px;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .slider:before {
+      content: '';
+      position: absolute;
+      width: 18px; height: 18px;
+      left: 3px; top: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: transform .2s cubic-bezier(.34,1.56,.64,1);
+      box-shadow: 0 1px 3px rgba(0,0,0,.15);
+    }
+    input:checked + .slider { background: var(--green); }
+    input:checked + .slider:before { transform: translateX(20px); }
+
+    /* ── Form elements ── */
+    .form-row { padding: 12px 16px; display: flex; gap: 8px; align-items: center; }
+    input[type=text], input[type=password], select {
+      background: #f8fafc;
+      border: 1.5px solid var(--border);
+      color: var(--text);
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+      font-family: inherit;
+    }
+    input:focus, select:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(22,163,74,.1);
+    }
+    select { flex: 1; cursor: pointer; }
+    select option { background: white; }
+
+    /* ── Buttons ── */
+    .btn {
+      border: none;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 0.84rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform .1s, box-shadow .1s, opacity .15s;
+      white-space: nowrap;
+      font-family: inherit;
+    }
+    .btn:active { transform: scale(.97); }
+    .btn-primary { background: var(--green); color: white; box-shadow: 0 1px 3px rgba(22,163,74,.3); }
+    .btn-primary:hover { background: var(--green-dark); }
+    .btn-ghost { background: #f1f5f9; color: #475569; }
+    .btn-ghost:hover { background: #e2e8f0; }
+
+    /* ── Status page ── */
+    .status-hero {
+      padding: 32px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    .status-orb {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      transition: all .3s;
+    }
+    .status-orb.connected { background: var(--green-light); }
+    .status-orb.connecting { background: var(--amber-light); animation: pulse 1.5s infinite; }
+    .status-orb.disconnected { background: var(--red-light); }
+    .status-orb svg { width: 32px; height: 32px; }
+    .status-orb.connected svg { fill: var(--green); }
+    .status-orb.connecting svg { fill: var(--amber); }
+    .status-orb.disconnected svg { fill: var(--red); }
+    .status-label { font-size: 1rem; font-weight: 600; }
+    .status-label.connected { color: var(--green-dark); }
+    .status-label.connecting { color: var(--amber); }
+    .status-label.disconnected { color: var(--red); }
+
+    #qr-wrap {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      padding: 0 16px 24px;
+    }
+    #qr-wrap p { font-size: 0.82rem; color: var(--muted); text-align: center; }
+    #qr-wrap img {
+      width: 200px; height: 200px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      padding: 8px;
+      background: white;
+    }
+
+    /* ── Inbox current ── */
+    .info-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; font-size: 0.83rem; color: var(--muted); border-top: 1px solid #f8fafc; }
+    .info-row strong { color: var(--text); font-weight: 500; }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%) translateY(12px);
+      background: #0f172a;
+      color: white;
+      padding: 9px 20px;
+      border-radius: 24px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      opacity: 0;
+      transition: opacity .2s, transform .2s;
+      pointer-events: none;
+      white-space: nowrap;
+      box-shadow: 0 4px 16px rgba(0,0,0,.2);
+      z-index: 100;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ── Link row ── */
+    .link-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: var(--text);
+      text-decoration: none;
+      border-bottom: 1px solid #f8fafc;
+      transition: background .1s;
+    }
+    .link-row:last-child { border-bottom: none; }
+    .link-row:hover { background: #f8fafc; }
+    .link-row .arrow { color: var(--muted); font-size: 1rem; }
+
+    /* ── Key status dot ── */
+    .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .dot.ok { background: var(--green); }
+    .dot.missing { background: var(--red); }
   </style>
 </head>
 <body>
 <div id="app">
+
   <header>
-    <h1>Cafofo Zap</h1>
-    <span id="wa-badge">carregando</span>
+    <div class="logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.122.554 4.11 1.523 5.832L.044 23.5l5.834-1.53A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.006-1.366l-.36-.213-3.714.975.99-3.623-.234-.374A9.818 9.818 0 012.182 12C2.182 6.578 6.578 2.182 12 2.182S21.818 6.578 21.818 12 17.422 21.818 12 21.818z"/></svg>
+      </div>
+      <span class="logo-name">Cafofo Zap</span>
+    </div>
+    <span class="badge" id="wa-badge">—</span>
   </header>
 
   <nav>
-    <button class="active" data-page="status">Status</button>
-    <button data-page="transcricoes">Transcrições</button>
-    <button data-page="config">Ajustes</button>
+    <button class="tab active" data-page="status">Status</button>
+    <button class="tab" data-page="transcricoes">Transcrições</button>
+    <button class="tab" data-page="config">Ajustes</button>
   </nav>
 
   <main>
@@ -100,8 +313,16 @@
     <!-- Status -->
     <div class="page active" id="page-status">
       <div class="card">
-        <div id="qr-box"><img id="qr" src="" alt="QR Code"></div>
-        <div class="status-info" id="status-info"></div>
+        <div class="status-hero">
+          <div class="status-orb disconnected" id="status-orb">
+            <svg id="status-icon" viewBox="0 0 24 24"></svg>
+          </div>
+          <span class="status-label disconnected" id="status-label">desconectado</span>
+        </div>
+        <div id="qr-wrap">
+          <img id="qr" src="" alt="QR Code">
+          <p>Escaneie com o WhatsApp para conectar</p>
+        </div>
       </div>
     </div>
 
@@ -109,25 +330,42 @@
     <div class="page" id="page-transcricoes">
 
       <div class="card">
-        <div class="card-title">Destino das transcrições</div>
+        <div class="card-header">
+          <div class="card-header-icon green">
+            <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+          </div>
+          <span class="card-title">Destino das transcrições</span>
+        </div>
         <div class="form-row">
           <select id="inbox-select"><option value="">— escolha um grupo —</option></select>
           <button class="btn btn-primary" id="inbox-save">Salvar</button>
         </div>
-        <div class="row" style="padding-top:0; border:none;">
-          <span style="font-size:0.8rem;color:#aaa">Atual: </span>
-          <span style="font-size:0.8rem;font-weight:500" id="inbox-current">não configurado</span>
+        <div class="info-row">
+          <span>Atual</span>
+          <strong id="inbox-current">não configurado</strong>
         </div>
       </div>
 
       <div class="card">
-        <div class="card-title">Remetentes monitorados</div>
+        <div class="card-header">
+          <div class="card-header-icon blue">
+            <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+          </div>
+          <span class="card-title">Remetentes monitorados</span>
+        </div>
         <div id="senders-list"></div>
-        <div style="font-size:0.75rem;color:#bbb;padding:10px 16px">Aparecem automaticamente conforme enviam mensagens.</div>
+        <div style="padding:10px 16px;font-size:0.75rem;color:var(--muted);border-top:1px solid #f8fafc">
+          Aparecem automaticamente conforme enviam mensagens nos grupos.
+        </div>
       </div>
 
       <div class="card">
-        <div class="card-title">Encaminhar áudio para transcrever</div>
+        <div class="card-header">
+          <div class="card-header-icon purple">
+            <svg viewBox="0 0 24 24"><path d="M21 3L3 10.53v.98l6.84 2.65L12.48 21h.98L21 3z"/></svg>
+          </div>
+          <span class="card-title">Encaminhar para transcrever</span>
+        </div>
         <div id="autotranscribe-list"></div>
       </div>
 
@@ -135,22 +373,40 @@
 
     <!-- Ajustes -->
     <div class="page" id="page-config">
+
       <div class="card">
-        <div class="card-title">Groq API Key</div>
+        <div class="card-header">
+          <div class="card-header-icon amber">
+            <svg viewBox="0 0 24 24"><path d="M12.65 10C11.83 7.67 9.61 6 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.61 0 4.83-1.67 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg>
+          </div>
+          <span class="card-title">Groq API Key</span>
+        </div>
         <div class="form-row">
           <input type="password" id="groq-input" placeholder="gsk_..." style="flex:1">
           <button class="btn btn-primary" id="groq-save">Salvar</button>
         </div>
-        <div class="row" style="border:none;">
-          <span style="font-size:0.8rem;color:#aaa">Status: </span>
-          <span id="groq-status" style="font-size:0.8rem;font-weight:500">...</span>
+        <div class="info-row">
+          <span>Status</span>
+          <div style="display:flex;align-items:center;gap:6px">
+            <div class="dot missing" id="groq-dot"></div>
+            <strong id="groq-status">Não configurada</strong>
+          </div>
         </div>
       </div>
 
       <div class="card">
-        <div class="card-title">Links</div>
-        <div class="row"><a href="/logs" style="font-size:0.85rem;color:#4caf50;text-decoration:none">Ver logs em tempo real →</a></div>
+        <div class="card-header">
+          <div class="card-header-icon green">
+            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14H7v-2h5v2zm5-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+          </div>
+          <span class="card-title">Ferramentas</span>
+        </div>
+        <a href="/logs" class="link-row">
+          <span>Logs em tempo real</span>
+          <span class="arrow">›</span>
+        </a>
       </div>
+
     </div>
 
   </main>
@@ -159,48 +415,67 @@
 <div id="toast"></div>
 
 <script>
-  // --- Nav ---
-  const navBtns = document.querySelectorAll('nav button');
-  navBtns.forEach(btn => {
+  // ── Icons ──
+  const ICONS = {
+    connected: 'M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z',
+    connecting: 'M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z',
+    disconnected: 'M19.59 7L12 14.59 6.41 9H11V7H3v8h2v-4.59l7 7 9-9z',
+  };
+
+  // ── Nav ──
+  document.querySelectorAll('.tab').forEach(btn => {
     btn.onclick = () => {
-      navBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
+      document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
       document.getElementById('page-' + btn.dataset.page).classList.add('active');
     };
   });
 
-  // --- State ---
-  let groupsCache = [];
-  let enabledCache = new Set();
-  let lastStatus = null;
-
-  // --- Status page ---
-  async function refresh() {
-    const data = await fetch('/status').then(r => r.json()).catch(() => ({ status: 'disconnected', qr: null }));
-    const badge = document.getElementById('wa-badge');
-    badge.textContent = data.status;
-    badge.className = data.status;
-
-    const qrBox = document.getElementById('qr-box');
-    const qrImg = document.getElementById('qr');
-    if (data.qr) {
-      qrImg.src = data.qr;
-      qrBox.style.display = 'flex';
-    } else {
-      qrBox.style.display = 'none';
-    }
-
-    const info = document.getElementById('status-info');
-    info.innerHTML = `
-      <div class="status-line"><span>Conexão</span><span>${data.status}</span></div>
-    `;
-
-    if (data.status === 'connected' && lastStatus !== 'connected') loadGroups();
-    lastStatus = data.status;
+  // ── Avatar colors ──
+  function avatarColor(name) {
+    const palette = ['#3b82f6','#8b5cf6','#ec4899','#f59e0b','#06b6d4','#10b981','#f97316','#6366f1','#14b8a6','#ef4444'];
+    let h = 0;
+    for (const c of name) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+    return palette[h % palette.length];
   }
 
-  // --- Groups data ---
+  function initials(name) {
+    return name.split(/\s+/).slice(0, 2).map(w => w[0] || '').join('').toUpperCase() || '?';
+  }
+
+  // ── State ──
+  let groupsCache = [], enabledCache = new Set(), lastStatus = null;
+
+  // ── Status ──
+  async function refresh() {
+    const data = await fetch('/status').then(r => r.json()).catch(() => ({ status: 'disconnected' }));
+    const s = data.status;
+
+    document.getElementById('wa-badge').textContent = { connected: 'Conectado', connecting: 'Conectando', disconnected: 'Desconectado' }[s] || s;
+    document.getElementById('wa-badge').className = 'badge ' + s;
+
+    const orb = document.getElementById('status-orb');
+    const lbl = document.getElementById('status-label');
+    const icon = document.getElementById('status-icon');
+    orb.className = 'status-orb ' + s;
+    lbl.className = 'status-label ' + s;
+    lbl.textContent = { connected: 'Conectado', connecting: 'Aguardando QR…', disconnected: 'Desconectado' }[s] || s;
+    icon.innerHTML = `<path d="${ICONS[s] || ICONS.disconnected}"/>`;
+
+    const qrWrap = document.getElementById('qr-wrap');
+    if (data.qr) {
+      document.getElementById('qr').src = data.qr;
+      qrWrap.style.display = 'flex';
+    } else {
+      qrWrap.style.display = 'none';
+    }
+
+    if (s === 'connected' && lastStatus !== 'connected') loadGroups();
+    lastStatus = s;
+  }
+
+  // ── Groups ──
   async function loadGroups() {
     const [groups, enabled] = await Promise.all([
       fetch('/groups').then(r => r.json()),
@@ -213,7 +488,7 @@
     renderSenders();
   }
 
-  // --- Autotranscribe ---
+  // ── Autotranscribe ──
   function renderAutotranscribe() {
     const el = document.getElementById('autotranscribe-list');
     el.innerHTML = '';
@@ -221,41 +496,28 @@
     groupsCache.forEach(g => {
       const row = document.createElement('div');
       row.className = 'row';
+      const color = avatarColor(g.name);
       row.innerHTML = `
-        <div class="row-info">
-          <div class="row-name">${g.name}</div>
-        </div>
-        <label class="toggle">
-          <input type="checkbox" ${enabledCache.has(g.id) ? 'checked' : ''}>
-          <span class="slider"></span>
-        </label>`;
-      const cb = row.querySelector('input');
-      cb.onchange = async () => {
+        <div class="avatar" style="background:${color}">${initials(g.name)}</div>
+        <div class="row-info"><div class="row-name">${g.name}</div></div>
+        <label class="toggle"><input type="checkbox" ${enabledCache.has(g.id) ? 'checked' : ''}><span class="slider"></span></label>`;
+      row.querySelector('input').onchange = async (e) => {
         const id = encodeURIComponent(g.id);
-        if (cb.checked) {
-          await fetch(`/autotranscribe/${id}`, { method: 'POST' });
-          enabledCache.add(g.id);
-          toast(`Ativado: ${g.name}`);
-        } else {
-          await fetch(`/autotranscribe/${id}`, { method: 'DELETE' });
-          enabledCache.delete(g.id);
-          toast(`Desativado: ${g.name}`);
-        }
+        if (e.target.checked) { await fetch(`/autotranscribe/${id}`, { method: 'POST' }); enabledCache.add(g.id); toast('Ativado: ' + g.name); }
+        else { await fetch(`/autotranscribe/${id}`, { method: 'DELETE' }); enabledCache.delete(g.id); toast('Desativado: ' + g.name); }
       };
       el.appendChild(row);
     });
   }
 
-  // --- Inbox ---
+  // ── Inbox ──
   async function renderInboxSelect() {
     const sel = document.getElementById('inbox-select');
     const cur = document.getElementById('inbox-current');
     const { jid } = await fetch('/config/inbox').then(r => r.json());
     sel.innerHTML = '<option value="">— escolha um grupo —</option>';
     groupsCache.forEach(g => {
-      const o = document.createElement('option');
-      o.value = g.id; o.textContent = g.name;
-      if (g.id === jid) o.selected = true;
+      const o = new Option(g.name, g.id, false, g.id === jid);
       sel.appendChild(o);
     });
     const found = groupsCache.find(g => g.id === jid);
@@ -269,7 +531,7 @@
     toast(jid ? 'Destino salvo' : 'Destino removido');
   };
 
-  // --- Senders ---
+  // ── Senders ──
   async function renderSenders() {
     const list = await fetch('/senders').then(r => r.json());
     const el = document.getElementById('senders-list');
@@ -278,35 +540,32 @@
     list.forEach(s => {
       const row = document.createElement('div');
       row.className = 'row';
+      const color = avatarColor(s.name);
       row.innerHTML = `
+        <div class="avatar" style="background:${color}">${initials(s.name)}</div>
         <div class="row-info">
           <div class="row-name">${s.name}</div>
           <div class="row-sub">${s.jid}</div>
         </div>
-        <label class="toggle">
-          <input type="checkbox" ${s.monitored ? 'checked' : ''}>
-          <span class="slider"></span>
-        </label>`;
-      const cb = row.querySelector('input');
-      cb.onchange = async () => {
-        if (cb.checked) {
+        <label class="toggle"><input type="checkbox" ${s.monitored ? 'checked' : ''}><span class="slider"></span></label>`;
+      row.querySelector('input').onchange = async (e) => {
+        if (e.target.checked) {
           await fetch('/senders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ jid: s.jid, name: s.name }) });
-          toast(`Monitorando: ${s.name}`);
+          toast('Monitorando: ' + s.name);
         } else {
           await fetch(`/senders/${encodeURIComponent(s.jid)}`, { method: 'DELETE' });
-          toast(`Removido: ${s.name}`);
+          toast('Removido: ' + s.name);
         }
       };
       el.appendChild(row);
     });
   }
 
-  // --- Groq ---
+  // ── Groq ──
   async function loadGroqStatus() {
     const { set } = await fetch('/config/groq-key').then(r => r.json());
-    const el = document.getElementById('groq-status');
-    el.textContent = set ? 'Configurada' : 'Não configurada';
-    el.style.color = set ? '#2e7d32' : '#c62828';
+    document.getElementById('groq-status').textContent = set ? 'Configurada' : 'Não configurada';
+    document.getElementById('groq-dot').className = 'dot ' + (set ? 'ok' : 'missing');
   }
 
   document.getElementById('groq-save').onclick = async () => {
@@ -317,7 +576,7 @@
     toast(key ? 'API Key salva' : 'API Key removida');
   };
 
-  // --- Toast ---
+  // ── Toast ──
   let toastTimer;
   function toast(msg) {
     const el = document.getElementById('toast');
@@ -327,7 +586,7 @@
     toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
   }
 
-  // --- Init ---
+  // ── Init ──
   loadGroqStatus();
   refresh();
   setInterval(refresh, 3000);
