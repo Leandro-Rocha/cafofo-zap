@@ -6,6 +6,7 @@ const webhooks = require('./webhooks');
 const { transcribe } = require('./transcribe');
 const autotranscribe = require('./autotranscribe');
 const logger = require('./logger');
+const { getGroqApiKey, setConfig } = require('./config');
 
 const app = express();
 app.use(express.json());
@@ -102,6 +103,15 @@ app.post('/autotranscribe/:groupId', (req, res) => {
 
 app.delete('/autotranscribe/:groupId', (req, res) => {
   autotranscribe.disable(decodeURIComponent(req.params.groupId));
+  res.json({ ok: true });
+});
+
+// Config
+app.get('/config/groq-key', (_, res) => res.json({ set: !!getGroqApiKey() }));
+
+app.post('/config/groq-key', (req, res) => {
+  const { key } = req.body;
+  setConfig('groq_api_key', key || null);
   res.json({ ok: true });
 });
 

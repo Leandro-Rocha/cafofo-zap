@@ -18,6 +18,10 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS autotranscribe (
     group_id TEXT PRIMARY KEY
   );
+  CREATE TABLE IF NOT EXISTS config (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+  );
 `);
 
 module.exports = db;

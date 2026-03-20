@@ -46,6 +46,16 @@
     <div id="autotranscribe-list"></div>
   </div>
 
+  <div id="config-section" class="section" style="display:flex;">
+    <h2>Configuração</h2>
+    <div class="group" style="gap:8px;">
+      <span style="font-size:0.85rem;flex:1">Groq API Key</span>
+      <span id="groq-status" style="font-size:0.75rem;opacity:0.5">...</span>
+      <input id="groq-input" type="password" placeholder="gsk_..." style="background:#111;border:1px solid #444;color:#eee;padding:4px 8px;border-radius:4px;font-size:0.8rem;width:200px;">
+      <button id="groq-save" style="background:#2a4a2a;color:#4caf50;border:none;padding:4px 10px;border-radius:4px;cursor:pointer;font-size:0.8rem;">salvar</button>
+    </div>
+  </div>
+
   <div id="msg"></div>
 
   <script>
@@ -154,6 +164,26 @@
       msgEl.textContent = text;
       setTimeout(() => msgEl.textContent = '', 2500);
     }
+
+    // Groq API Key
+    const groqStatus = document.getElementById('groq-status');
+    const groqInput = document.getElementById('groq-input');
+    const groqSave = document.getElementById('groq-save');
+
+    fetch('/config/groq-key').then(r => r.json()).then(d => {
+      groqStatus.textContent = d.set ? '✓ configurada' : '✗ não configurada';
+      groqStatus.style.color = d.set ? '#4caf50' : '#f44336';
+    });
+
+    groqSave.onclick = async () => {
+      const key = groqInput.value.trim();
+      await fetch('/config/groq-key', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key }) });
+      groqInput.value = '';
+      const d = await fetch('/config/groq-key').then(r => r.json());
+      groqStatus.textContent = d.set ? '✓ configurada' : '✗ não configurada';
+      groqStatus.style.color = d.set ? '#4caf50' : '#f44336';
+      flash(key ? '✓ Groq API Key salva' : '✗ Groq API Key removida');
+    };
 
     refresh();
     setInterval(refresh, 3000);
