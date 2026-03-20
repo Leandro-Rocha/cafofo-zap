@@ -26,6 +26,11 @@ db.exec(`
     jid TEXT PRIMARY KEY,
     name TEXT NOT NULL
   );
+  CREATE TABLE IF NOT EXISTS known_senders (
+    jid TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    last_seen DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
 `);
 
 module.exports = db;

@@ -59,11 +59,7 @@
 
     <h2 style="margin-top:8px">Remetentes monitorados</h2>
     <div id="senders-list"></div>
-    <div class="row" style="gap:8px; flex-wrap:wrap;">
-      <input id="sender-name" type="text" placeholder="Nome" style="width:120px">
-      <input id="sender-phone" type="text" placeholder="55119..." style="flex:1">
-      <button class="primary" id="sender-add">+ add</button>
-    </div>
+    <div style="font-size:0.75rem;opacity:0.4;padding:0 4px">Remetentes aparecem automaticamente conforme enviam mensagens nos grupos.</div>
   </div>
 
   <!-- Grupos para encaminhamento -->
@@ -221,7 +217,7 @@
       const el = document.getElementById('senders-list');
       el.innerHTML = '';
       if (list.length === 0) {
-        el.innerHTML = '<div style="font-size:0.8rem;opacity:0.4;padding:4px">Nenhum remetente monitorado</div>';
+        el.innerHTML = '<div style="font-size:0.8rem;opacity:0.4;padding:4px">Nenhuma mensagem recebida ainda.</div>';
         return;
       }
       list.forEach(s => {
@@ -232,27 +228,23 @@
             <span class="group-name">${s.name}</span>
             <span class="group-id">${s.jid}</span>
           </div>
-          <button class="danger" data-jid="${s.jid}">remover</button>`;
-        row.querySelector('button').onclick = async () => {
-          await fetch(`/senders/${encodeURIComponent(s.jid)}`, { method: 'DELETE' });
-          flash(`✗ removido: ${s.name}`);
-          renderSenders();
+          <label class="toggle">
+            <input type="checkbox" ${s.monitored ? 'checked' : ''}>
+            <span class="slider"></span>
+          </label>`;
+        const checkbox = row.querySelector('input');
+        checkbox.onchange = async () => {
+          if (checkbox.checked) {
+            await fetch('/senders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ jid: s.jid, name: s.name }) });
+            flash(`✓ monitorando: ${s.name}`);
+          } else {
+            await fetch(`/senders/${encodeURIComponent(s.jid)}`, { method: 'DELETE' });
+            flash(`✗ removido: ${s.name}`);
+          }
         };
         el.appendChild(row);
       });
     }
-
-    document.getElementById('sender-add').onclick = async () => {
-      const name = document.getElementById('sender-name').value.trim();
-      const phone = document.getElementById('sender-phone').value.trim().replace(/\D/g, '');
-      if (!phone) { flash('informe o número'); return; }
-      const jid = `${phone}@s.whatsapp.net`;
-      await fetch('/senders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ jid, name: name || phone }) });
-      document.getElementById('sender-name').value = '';
-      document.getElementById('sender-phone').value = '';
-      flash(`✓ adicionado: ${name || phone}`);
-      renderSenders();
-    };
 
     // --- Groq API Key ---
 

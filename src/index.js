@@ -34,6 +34,9 @@ wa.setMessageHandler(async (event) => {
 
   if (isMe) return;
 
+  // Rastreia remetentes conhecidos
+  if (event.senderJid && event.sender) senders.trackSeen(event.senderJid, event.sender);
+
   // Áudio de remetente monitorado → caixa de entrada
   if (event.type === 'audio' && senders.isMonitored(event.senderJid)) {
     const text = await transcribe(event.buffer, event.mimetype).catch((err) => { console.error('[transcribe] erro:', err.message); return null; });
@@ -135,7 +138,7 @@ app.post('/config/inbox', (req, res) => {
 });
 
 // Remetentes monitorados
-app.get('/senders', (_, res) => res.json(senders.list()));
+app.get('/senders', (_, res) => res.json(senders.listKnown()));
 
 app.post('/senders', (req, res) => {
   const { jid, name } = req.body;
