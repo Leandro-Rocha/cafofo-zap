@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cafofo Zap — Logs</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #0d0d0d; color: #ccc; font-family: monospace; font-size: 13px; display: flex; flex-direction: column; height: 100vh; }
+    #toolbar { display: flex; align-items: center; gap: 12px; padding: 8px 12px; background: #1a1a1a; border-bottom: 1px solid #333; flex-shrink: 0; }
+    #toolbar h1 { font-size: 0.85rem; opacity: 0.5; letter-spacing: 1px; text-transform: uppercase; }
+    #status-dot { width: 8px; height: 8px; border-radius: 50%; background: #555; flex-shrink: 0; }
+    #status-dot.connected { background: #4caf50; }
+    .spacer { flex: 1; }
+    button { background: #333; border: none; color: #ccc; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+    button:hover { background: #444; }
+    label { font-size: 12px; opacity: 0.6; display: flex; align-items: center; gap: 4px; cursor: pointer; }
+    #log { flex: 1; overflow-y: auto; padding: 8px 12px; }
+    .line { padding: 2px 0; line-height: 1.5; white-space: pre-wrap; word-break: break-all; border-bottom: 1px solid #1a1a1a; }
+    .line:hover { background: #1a1a1a; }
+    .ts { opacity: 0.35; margin-right: 8px; }
+    .level-error { color: #f44336; }
+    .level-warn { color: #ffc107; }
+  </style>
+</head>
+<body>
+  <div id="toolbar">
+    <div id="status-dot"></div>
+    <h1>Logs</h1>
+    <span class="spacer"></span>
+    <label><input type="checkbox" id="autoscroll" checked> auto-scroll</label>
+    <button onclick="document.getElementById('log').innerHTML=''">limpar</button>
+    <a href="/" style="color:#ccc;font-size:12px;text-decoration:none;opacity:0.5">← admin</a>
+  </div>
+  <div id="log"></div>
+
+  <script>
+    const logEl = document.getElementById('log');
+    const dot = document.getElementById('status-dot');
+    const autoscroll = document.getElementById('autoscroll');
+
+    function fmt(ts) {
+      return new Date(ts).toLocaleTimeString('pt-BR', { hour12: false });
+    }
+
+    function appendLine({ ts, level, text }) {
+      const el = document.createElement('div');
+      el.className = 'line' + (level === 'error' ? ' level-error' : level === 'warn' ? ' level-warn' : '');
+      el.innerHTML = `<span class="ts">${fmt(ts)}</span>${text.replace(/</g, '&lt;')}`;
+      logEl.appendChild(el);
+      if (autoscroll.checked) logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    // Load history
+    fetch('/logs/history').then(r => r.json()).then(lines => {
+      lines.forEach(appendLine);
+    });
+
+    // Stream
+    const es = new EventSource('/logs/stream');
+    es.onopen = () => dot.classList.add('connected');
+    es.onerror = () => dot.classList.remove('connected');
+    es.onmessage = (e) => appendLine(JSON.parse(e.data));
+  </script>
+</body>
+</html>

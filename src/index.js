@@ -1,9 +1,11 @@
+require('./logger'); // intercepts console.log/error/warn
 const express = require('express');
 const path = require('path');
 const wa = require('./whatsapp');
 const webhooks = require('./webhooks');
 const { transcribe } = require('./transcribe');
 const autotranscribe = require('./autotranscribe');
+const logger = require('./logger');
 
 const app = express();
 app.use(express.json());
@@ -107,6 +109,20 @@ app.post('/disconnect', (req, res) => {
 });
 
 app.get('/health', (_, res) => res.json({ ok: true }));
+
+// Logs
+app.get('/logs/history', (_, res) => res.json(logger.getLines()));
+
+app.get('/logs/stream', (req, res) => {
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.flushHeaders();
+  logger.addClient(res);
+  req.on('close', () => logger.removeClient(res));
+});
+
+app.get('/logs', (_, res) => res.sendFile(path.join(__dirname, 'logs.html')));
 
 app.get('/', (_, res) => res.sendFile(path.join(__dirname, 'admin.html')));
 
