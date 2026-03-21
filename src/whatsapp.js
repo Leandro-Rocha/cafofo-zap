@@ -102,7 +102,7 @@ async function connect() {
       const originalSender = originalSenderJid ? originalSenderJid.replace(/@.+$/, '') : null;
 
       if (!isMySender && textContent) {
-        await onMessage({ type: 'text', groupId, sender, text: textContent, fromMe, isMySender, raw: msg });
+        await onMessage({ type: 'text', groupId, sender, senderJid, text: textContent, fromMe, isMySender, raw: msg });
       } else if (audioMsg) {
         try {
           const buffer = await downloadMediaMessage(msg, 'buffer', {}, {
