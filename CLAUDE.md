@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-**cafofo-zap** — WhatsApp gateway service. Manages a single Baileys session and distributes messages (text + audio) to other services via webhooks. Other projects integrate via REST API instead of managing their own WhatsApp connection.
+**cafofo-zap** — WhatsApp gateway service. Manages a single Baileys session and fans out all incoming messages (text + audio) to registered webhooks. Has no transcription logic — that lives in **cafofo-transcribe**.
 
 ## Commands
 
@@ -15,15 +15,11 @@ docker compose up -d     # run via Docker
 
 ## Architecture
 
-- **`whatsapp.js`** — Baileys connection. Emits messages to `onMessage` and contacts to `onContacts`. Tracks `myJid` and `myLid` (Baileys multi-device uses `@lid` JIDs — own messages arrive as `senderJid@lid`, not `@s.whatsapp.net`).
-- **`index.js`** — Express server. Wires message handler (auto-transcription → inbox, webhook dispatch) and all routes.
+- **`whatsapp.js`** — Baileys connection. Emits messages via `onMessage`. Tracks `myJid` and `myLid` (Baileys multi-device uses `@lid` JIDs — own messages arrive as `senderJid@lid`, not `@s.whatsapp.net`). Dispatches both text and audio events; both include `senderJid`.
+- **`index.js`** — Express server. Wires message handler (`webhooks.dispatch`) and all routes. No transcription logic.
 - **`webhooks.js`** — SQLite registry. `dispatch(event)` fans out to matching webhooks in parallel.
-- **`transcribe.js`** — Groq Whisper transcription. Uses `getGroqApiKey()` from `config.js`.
-- **`autotranscribe.js`** — CRUD for groups where own/forwarded audio is transcribed to inbox.
-- **`senders.js`** — Monitored senders (transcribe their audio → inbox). Also tracks all known senders from `contacts.update` events.
-- **`config.js`** — Key-value store in SQLite. `getGroqApiKey()` checks env var first, then DB. `transcribe_inbox_jid` stores the destination group for transcriptions.
 - **`logger.js`** — Intercepts `console.log/error/warn` and streams to SSE clients at `/logs`.
-- **`db.js`** — SQLite (better-sqlite3). Tables: `webhooks`, `autotranscribe`, `config`, `transcribe_senders`, `known_senders`.
+- **`db.js`** — SQLite (better-sqlite3). Table: `webhooks` only.
 
 ## API
 
@@ -36,16 +32,6 @@ docker compose up -d     # run via Docker
 | POST | `/webhooks` | Register webhook (`url`, `groupId?`, `events?`, `secret?`) |
 | DELETE | `/webhooks/:id` | Remove webhook |
 | POST | `/notify/deploy` | Send deploy notification (`groupId`, `service`, `status`, `actor`, `branch`, `commit`) |
-| GET | `/autotranscribe` | List groups with auto-transcription enabled |
-| POST | `/autotranscribe/:groupId` | Enable auto-transcription for group |
-| DELETE | `/autotranscribe/:groupId` | Disable auto-transcription for group |
-| GET | `/senders` | List known senders with `monitored` flag |
-| POST | `/senders` | Add monitored sender (`jid`, `name`) |
-| DELETE | `/senders/:jid` | Remove monitored sender |
-| GET | `/config/groq-key` | Check if Groq API key is set |
-| POST | `/config/groq-key` | Set Groq API key (`key`) |
-| GET | `/config/inbox` | Get transcription inbox group (`jid`) |
-| POST | `/config/inbox` | Set transcription inbox group (`jid`) |
 | POST | `/disconnect` | Logout and clear session |
 | GET | `/health` | Health check |
 | GET | `/logs` | Real-time log viewer (HTML) |
@@ -60,26 +46,21 @@ docker compose up -d     # run via Docker
   "type": "text" | "audio",
   "groupId": "1234@g.us",
   "sender": "Nome",
+  "senderJid": "5511999999999@s.whatsapp.net | null",
   "text": "mensagem de texto ou null",
   "audioBase64": "base64 do áudio ou null",
   "mimetype": "audio/ogg; codecs=opus",
-  "transcription": "transcrição via Groq Whisper ou null",
   "timestamp": 1234567890
 }
 ```
 
 Webhooks are filtered by `group_id` (null = all groups) and `events` (comma-separated: `text,audio`).
 If `secret` is set, it's sent in the `X-Webhook-Secret` header.
-
-## Transcription inbox
-
-Own audio and forwarded audio in `autotranscribe`-enabled groups are transcribed and sent to a configured destination group (not back to the source group). Monitored senders' audio from any group is also routed to the inbox.
+Transcription is handled by **cafofo-transcribe**, which registers itself as a webhook.
 
 ## Gotchas
 
 - **Baileys `@lid` JIDs**: In multi-device mode, own messages arrive with `senderJid` ending in `@lid` (e.g. `88313285369856@lid`), not `@s.whatsapp.net`. Both `myJid` and `myLid` are stored on connect; `isMySender` checks both.
-- **`contacts.update`** fires incrementally (1 contact at a time), not as a full list. `contacts.set` may never fire in newer Baileys versions.
-- **Groq API key** is stored in the SQLite `config` table (persists across container restarts). Env var `GROQ_API_KEY` takes priority if set.
 
 ## Environment variables
 
@@ -88,4 +69,3 @@ Own audio and forwarded audio in `autotranscribe`-enabled groups are transcribed
 | `PORT` | 3010 | API port |
 | `DB_PATH` | `/data/cafofo-zap.db` | SQLite path |
 | `WA_DATA_DIR` | `/data` | Baileys auth storage |
-| `GROQ_API_KEY` | — | Optional; prefer setting via admin UI (persisted in DB) |
