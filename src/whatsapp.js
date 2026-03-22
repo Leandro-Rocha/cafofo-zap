@@ -56,7 +56,6 @@ async function connect() {
   sock = makeWASocket({
     version,
     auth: state,
-    printQRInTerminal: true,
     logger: pino({ level: 'silent' }),
     browser: Browsers.ubuntu('Chrome'),
   });
