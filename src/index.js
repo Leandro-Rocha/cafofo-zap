@@ -38,9 +38,9 @@ app.post('/send', async (req, res) => {
 app.get('/webhooks', (req, res) => res.json(webhooks.list()));
 
 app.post('/webhooks', (req, res) => {
-  const { url, groupId, events, secret } = req.body;
+  const { url, groupId, events, transcribe, secret } = req.body;
   if (!url) return res.status(400).json({ error: 'url obrigatória' });
-  const hook = webhooks.register({ url, groupId, events, secret });
+  const hook = webhooks.register({ url, groupId, events, transcribe: !!transcribe, secret });
   res.status(201).json(hook);
 });
 
@@ -68,6 +68,19 @@ app.post('/notify/deploy', async (req, res) => {
 
 app.post('/disconnect', (req, res) => {
   wa.disconnect();
+  res.json({ ok: true });
+});
+
+app.get('/config/groq-key', (_, res) => {
+  const { getGroqApiKey } = require('./transcribe');
+  res.json({ set: !!getGroqApiKey() });
+});
+
+app.post('/config/groq-key', (req, res) => {
+  const key = req.body.key || null;
+  const db = require('./db');
+  if (key) db.prepare('INSERT OR REPLACE INTO config (key, value) VALUES (?, ?)').run('groq_api_key', key);
+  else db.prepare('DELETE FROM config WHERE key = ?').run('groq_api_key');
   res.json({ ok: true });
 });
 
