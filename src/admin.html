@@ -4,31 +4,37 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cafofo Zap</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg:       #F5F3EF;
-      --surface:  #FFFFFF;
-      --surface2: #F9F7F4;
-      --border:   #E6E1D8;
-      --border2:  #EDE9E2;
-      --text:     #1A1410;
-      --text2:    #6B5E52;
-      --muted:    #ADA090;
-      --green:    #1B5E3A;
-      --green2:   #217A4A;
-      --green-bg: #E6F2EB;
-      --amber:    #904A07;
-      --amber-bg: #FDF0DF;
-      --red:      #991818;
-      --red-bg:   #FEECEC;
-      --r:        12px;
-      --r-sm:     8px;
+      --bg:        #0C0F16;
+      --surface:   #141820;
+      --surface2:  #1A1F2B;
+      --surface3:  #1E2433;
+      --border:    #252B38;
+      --border2:   #1E2330;
+      --text:      #E8EBF0;
+      --text2:     #8892A4;
+      --text3:     #4B5568;
+      --green:     #22C55E;
+      --green-dim: rgba(34,197,94,.12);
+      --green-glow:rgba(34,197,94,.25);
+      --amber:     #F59E0B;
+      --amber-dim: rgba(245,158,11,.12);
+      --red:       #EF4444;
+      --red-dim:   rgba(239,68,68,.12);
+      --blue:      #3B82F6;
+      --blue-dim:  rgba(59,130,246,.12);
+      --r:         10px;
+      --r-sm:      7px;
+      --mono:      'JetBrains Mono', monospace;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
+      font-family: 'Bricolage Grotesque', sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
@@ -36,367 +42,314 @@
     }
 
     #app {
-      max-width: 440px;
+      max-width: 480px;
       margin: 0 auto;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
     }
 
-    /* ─── HEADER ─── */
+    /* ── HEADER ── */
     header {
-      height: 50px;
+      height: 52px;
       background: var(--surface);
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
-      padding: 0 14px;
-      gap: 9px;
+      padding: 0 16px;
+      gap: 10px;
       position: sticky;
       top: 0;
       z-index: 30;
     }
 
     .logo-mark {
-      width: 26px; height: 26px;
+      width: 28px; height: 28px;
       background: var(--green);
-      border-radius: 7px;
+      border-radius: 8px;
       display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
+      box-shadow: 0 0 14px var(--green-glow);
     }
-    .logo-mark svg { width: 14px; height: 14px; fill: #fff; }
+    .logo-mark svg { width: 15px; height: 15px; fill: #000; }
 
     .logo-text {
-      font-size: 12.5px; font-weight: 700;
-      letter-spacing: 0.09em;
+      font-size: 13px; font-weight: 700;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
       flex: 1;
     }
 
+    /* ── PILL ── */
     .conn-pill {
       display: flex; align-items: center; gap: 5px;
-      padding: 3px 8px;
+      padding: 4px 10px;
       border-radius: 20px;
-      font-size: 11px; font-weight: 600;
-      letter-spacing: 0.02em;
-      transition: all .3s;
+      font-size: 11px; font-weight: 500;
+      font-family: var(--mono);
     }
-    .conn-pill .dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      flex-shrink: 0;
-      transition: background .3s;
-    }
-    .conn-pill.connected  { background: var(--green-bg); color: var(--green); }
-    .conn-pill.connected .dot { background: var(--green2); }
-    .conn-pill.connecting { background: var(--amber-bg); color: var(--amber); }
-    .conn-pill.connecting .dot { background: #D97706; animation: blink 1.2s ease-in-out infinite; }
-    .conn-pill.disconnected { background: var(--red-bg); color: var(--red); }
-    .conn-pill.disconnected .dot { background: var(--red); }
+    .conn-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .pill-connected    { background: var(--green-dim); color: var(--green); border: 1px solid rgba(34,197,94,.2); }
+    .pill-connected .conn-dot { background: var(--green); box-shadow: 0 0 6px var(--green); }
+    .pill-connecting   { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(245,158,11,.2); }
+    .pill-connecting .conn-dot { background: var(--amber); animation: blink 1.2s ease-in-out infinite; }
+    .pill-disconnected { background: var(--red-dim);   color: var(--red);   border: 1px solid rgba(239,68,68,.2); }
+    .pill-disconnected .conn-dot { background: var(--red); }
 
-    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
 
-    /* ─── TABS ─── */
+    /* ── NAV ── */
     nav {
       background: var(--surface);
       border-bottom: 1px solid var(--border);
       display: flex;
       position: sticky;
-      top: 50px;
+      top: 52px;
       z-index: 29;
-      padding: 0 10px;
+      padding: 0 8px;
     }
     .tab {
       background: none; border: none;
       border-bottom: 2px solid transparent;
-      padding: 10px 10px 8px;
+      padding: 11px 12px 9px;
       font-size: 11px; font-weight: 600;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: var(--muted);
+      color: var(--text3);
       cursor: pointer;
       transition: color .15s, border-color .15s;
+      font-family: inherit;
     }
     .tab.active { color: var(--green); border-bottom-color: var(--green); }
     .tab:hover:not(.active) { color: var(--text2); }
 
-    /* ─── MAIN ─── */
-    main { flex: 1; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
-    .page { display: none; flex-direction: column; gap: 10px; animation: fadeUp .12s ease; }
-    .page.active { display: flex; }
-    @keyframes fadeUp { from { opacity:0; transform:translateY(5px) } to { opacity:1; transform:translateY(0) } }
+    /* ── MAIN ── */
+    main { flex: 1; padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+    .page { display: none; flex-direction: column; gap: 12px; }
+    .page.active { display: flex; animation: fadeUp .14s ease; }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(4px) } to { opacity:1; transform:none } }
 
-    /* ─── STATUS PAGE ─── */
-    #status-banner {
-      border-radius: var(--r);
-      padding: 16px;
-      display: flex; align-items: center; gap: 12px;
-    }
-    #status-banner.connected { background: var(--green-bg); }
-    #status-banner.connecting { background: var(--amber-bg); }
-    #status-banner.disconnected { background: var(--red-bg); }
-
-    .s-orb {
-      width: 38px; height: 38px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-    }
-    .s-orb svg { width: 18px; height: 18px; }
-    .connected .s-orb { background: rgba(27,94,58,.15); }
-    .connected .s-orb svg { fill: var(--green); }
-    .connecting .s-orb { background: rgba(144,74,7,.12); }
-    .connecting .s-orb svg { fill: var(--amber); animation: spin 1.4s linear infinite; }
-    .disconnected .s-orb { background: rgba(153,24,24,.12); }
-    .disconnected .s-orb svg { fill: var(--red); }
-
-    @keyframes spin { to { transform: rotate(360deg) } }
-
-    .s-info { flex: 1; min-width: 0; }
-    .s-label { font-size: 14px; font-weight: 600; }
-    .connected .s-label { color: var(--green); }
-    .connecting .s-label { color: var(--amber); }
-    .disconnected .s-label { color: var(--red); }
-    .s-sub { font-size: 11.5px; margin-top: 2px; }
-    .connected .s-sub { color: #3A7D56; }
-    .connecting .s-sub { color: #9D6020; }
-    .disconnected .s-sub { color: #A03030; }
-
-    #qr-card {
-      display: none;
+    /* ── STATUS RING ── */
+    .status-ring-wrap {
+      display: flex; flex-direction: column; align-items: center;
+      padding: 32px 20px 26px;
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--r);
-      padding: 20px;
-      align-items: center;
-      flex-direction: column;
-      gap: 12px;
+      gap: 14px;
     }
-    #qr-card.show { display: flex; }
-    #qr-card img {
-      width: 180px; height: 180px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      padding: 5px; background: #fff;
-    }
-    #qr-card p { font-size: 11.5px; color: var(--text2); text-align: center; line-height: 1.6; max-width: 260px; }
 
-    /* ─── CARDS ─── */
-    .card {
-      background: var(--surface);
-      border-radius: var(--r);
-      border: 1px solid var(--border);
-      overflow: hidden;
+    .status-ring { position: relative; width: 84px; height: 84px; }
+    .ring-svg { width: 84px; height: 84px; transform: rotate(-90deg); }
+    .ring-bg  { fill: none; stroke: var(--surface3); stroke-width: 5; }
+    .ring-arc { fill: none; stroke-width: 5; stroke-linecap: round;
+                transition: stroke .4s, stroke-dashoffset .6s; }
+    .ring-icon { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+    .ring-icon svg { width: 26px; height: 26px; transition: fill .3s; }
+
+    .ring-connected    .ring-arc { stroke: var(--green); stroke-dasharray: 264; stroke-dashoffset: 0; }
+    .ring-connected    .ring-icon svg { fill: var(--green); }
+    .ring-connecting   .ring-arc { stroke: var(--amber); stroke-dasharray: 264; stroke-dashoffset: 0; animation: ring-spin 1.6s linear infinite; }
+    .ring-connecting   .ring-icon svg { fill: var(--amber); }
+    .ring-disconnected .ring-arc { stroke: var(--red);   stroke-dasharray: 264; stroke-dashoffset: 198; }
+    .ring-disconnected .ring-icon svg { fill: var(--red); }
+
+    @keyframes ring-spin { to { stroke-dashoffset: -264; } }
+
+    .status-label { font-size: 18px; font-weight: 700; letter-spacing: -.01em; }
+    .status-label.connected    { color: var(--green); }
+    .status-label.connecting   { color: var(--amber); }
+    .status-label.disconnected { color: var(--red);   }
+    .status-sub { font-size: 12px; color: var(--text2); margin-top: -8px; }
+
+    /* ── QR ── */
+    .qr-card {
+      display: none; background: var(--surface);
+      border: 1px solid var(--border); border-radius: var(--r);
+      padding: 22px; align-items: center; flex-direction: column; gap: 14px;
     }
+    .qr-card.show { display: flex; }
+    .qr-card img { width: 176px; height: 176px; border-radius: 8px; border: 6px solid #fff; background: #fff; }
+    .qr-hint { font-size: 12px; color: var(--text2); text-align: center; line-height: 1.65; max-width: 260px; }
+
+    /* ── CARD ── */
+    .card { background: var(--surface); border-radius: var(--r); border: 1px solid var(--border); overflow: hidden; }
 
     .card-head {
       display: flex; align-items: center; gap: 8px;
-      padding: 10px 13px 8px;
+      padding: 11px 14px 10px;
       border-bottom: 1px solid var(--border2);
     }
-    .ci {
+    .card-icon {
       width: 22px; height: 22px; border-radius: 6px;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
     }
-    .ci svg { width: 12px; height: 12px; }
-    .ci-g { background: var(--green-bg); } .ci-g svg { fill: var(--green); }
-    .ci-b { background: #DBEAFE; } .ci-b svg { fill: #1D4ED8; }
-    .ci-p { background: #EDE9FE; } .ci-p svg { fill: #6D28D9; }
-    .ci-a { background: var(--amber-bg); } .ci-a svg { fill: var(--amber); }
-    .card-title { font-size: 11px; font-weight: 600; color: var(--text2); letter-spacing: 0.04em; text-transform: uppercase; }
+    .card-icon svg { width: 12px; height: 12px; }
+    .ci-green { background: var(--green-dim); } .ci-green svg { fill: var(--green); }
+    .ci-blue  { background: var(--blue-dim);  } .ci-blue  svg { fill: var(--blue);  }
+    .ci-amber { background: var(--amber-dim); } .ci-amber svg { fill: var(--amber); }
+    .ci-red   { background: var(--red-dim);   } .ci-red   svg { fill: var(--red);   }
 
-    .card-empty { padding: 18px 13px; text-align: center; color: var(--muted); font-size: 12.5px; }
+    .card-title { font-size: 10.5px; font-weight: 600; color: var(--text2); letter-spacing: 0.07em; text-transform: uppercase; flex: 1; }
+    .card-count { font-size: 11px; color: var(--text3); font-family: var(--mono); }
+    .card-empty { padding: 20px 14px; text-align: center; color: var(--text3); font-size: 12.5px; }
 
-    /* ─── ROWS ─── */
+    /* ── ROW ── */
     .row {
       display: flex; align-items: center; gap: 10px;
-      padding: 9px 13px;
+      padding: 10px 14px;
       border-bottom: 1px solid var(--border2);
       transition: background .1s;
     }
     .row:last-child { border-bottom: none; }
+    .row:hover { background: var(--surface2); }
 
     .avatar {
-      width: 32px; height: 32px;
-      border-radius: 8px;
+      width: 34px; height: 34px; border-radius: 9px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 10.5px; font-weight: 800;
-      color: #fff; flex-shrink: 0;
+      font-size: 11px; font-weight: 700;
+      color: #000; flex-shrink: 0; font-family: var(--mono);
     }
 
     .row-info { flex: 1; min-width: 0; }
-    .row-name { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .row-sub { font-size: 10px; color: var(--muted); font-family: 'SF Mono', 'Fira Code', monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
+    .row-name { font-size: 13.5px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .row-sub  { font-size: 10.5px; color: var(--text3); font-family: var(--mono); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
 
-    /* ─── TOGGLE ─── */
-    .toggle { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
+    /* ── COPY BTN ── */
+    .copy-btn {
+      background: var(--surface2); border: 1px solid var(--border); cursor: pointer;
+      padding: 4px 8px; border-radius: 5px;
+      color: var(--text3); font-size: 10.5px; font-family: var(--mono);
+      flex-shrink: 0; transition: all .1s;
+    }
+    .copy-btn:hover { background: var(--surface3); color: var(--text2); }
+    .copy-btn.copied { color: var(--green); border-color: rgba(34,197,94,.3); }
+
+    /* ── BUTTON ── */
+    .btn {
+      border: none; border-radius: var(--r-sm);
+      padding: 8px 16px; font-size: 12.5px; font-weight: 600;
+      cursor: pointer; white-space: nowrap; font-family: inherit;
+      transition: filter .1s, transform .1s;
+    }
+    .btn:active { transform: scale(.97); }
+    .btn-primary { background: var(--green); color: #000; }
+    .btn-primary:hover { filter: brightness(1.1); }
+    .btn-danger { background: var(--red-dim); color: var(--red); border: 1px solid rgba(239,68,68,.2); }
+    .btn-danger:hover { background: rgba(239,68,68,.2); }
+    .btn-ghost { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); }
+    .btn-ghost:hover { background: var(--surface3); }
+    .btn-sm { padding: 6px 12px; font-size: 11.5px; }
+
+    /* ── ICON BTN ── */
+    .icon-btn {
+      background: none; border: none; cursor: pointer;
+      width: 28px; height: 28px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text3); transition: background .1s, color .1s; flex-shrink: 0;
+    }
+    .icon-btn:hover { background: var(--red-dim); color: var(--red); }
+    .icon-btn svg { width: 14px; height: 14px; fill: currentColor; }
+
+    /* ── SEARCH ── */
+    .search-input {
+      background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text); padding: 4px 9px;
+      border-radius: var(--r-sm); font-size: 12px; outline: none;
+      font-family: inherit; width: 100px;
+      transition: border-color .15s, width .2s;
+    }
+    .search-input:focus { border-color: var(--green); width: 140px; background: var(--surface3); }
+    .search-input::placeholder { color: var(--text3); }
+
+    /* ── FIELD ── */
+    .field { padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; }
+    .field + .field { border-top: 1px solid var(--border2); }
+    .field-row { display: flex; gap: 8px; align-items: stretch; }
+
+    input[type=text], input[type=password], input[type=url], select {
+      background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text); padding: 8px 10px;
+      border-radius: var(--r-sm); font-size: 13px; outline: none;
+      font-family: inherit; transition: border-color .15s; width: 100%;
+    }
+    input:focus, select:focus { border-color: var(--green); background: var(--surface3); }
+    input::placeholder { color: var(--text3); }
+    select { cursor: pointer; -webkit-appearance: none; appearance: none; }
+
+    /* ── TOGGLE ── */
+    .toggle { position: relative; width: 38px; height: 21px; flex-shrink: 0; }
     .toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
     .slider {
       position: absolute; inset: 0;
-      background: #DDD7CC; border-radius: 22px; cursor: pointer;
-      transition: background .2s;
+      background: var(--surface3); border-radius: 21px; cursor: pointer;
+      border: 1px solid var(--border); transition: background .2s, border-color .2s;
     }
     .slider::before {
       content: ''; position: absolute;
-      width: 16px; height: 16px; left: 3px; top: 3px;
-      background: #fff; border-radius: 50%;
-      transition: transform .2s cubic-bezier(.34,1.56,.64,1);
-      box-shadow: 0 1px 3px rgba(0,0,0,.18);
+      width: 15px; height: 15px; left: 2px; top: 2px;
+      background: var(--text3); border-radius: 50%;
+      transition: transform .2s cubic-bezier(.34,1.56,.64,1), background .2s;
     }
-    input:checked + .slider { background: var(--green2); }
-    input:checked + .slider::before { transform: translateX(18px); }
+    input:checked + .slider { background: var(--green-dim); border-color: rgba(34,197,94,.3); }
+    input:checked + .slider::before { transform: translateX(17px); background: var(--green); }
 
-    /* ─── FIELD ─── */
-    .field { padding: 11px 13px; display: flex; flex-direction: column; gap: 6px; }
-    .field + .field { border-top: 1px solid var(--border2); }
-    .field-label { font-size: 11px; color: var(--muted); font-weight: 500; letter-spacing: 0.03em; }
-
-    .field-row { display: flex; gap: 7px; align-items: stretch; }
-
-    .select-wrap {
-      flex: 1; position: relative; min-width: 0;
-    }
-    .select-wrap::after {
-      content: '';
-      position: absolute;
-      right: 10px; top: 50%; transform: translateY(-50%);
-      width: 0; height: 0;
-      border-left: 4px solid transparent;
-      border-right: 4px solid transparent;
-      border-top: 5px solid var(--muted);
-      pointer-events: none;
-    }
-    select {
-      width: 100%;
-      background: var(--bg);
-      border: 1.5px solid var(--border);
-      color: var(--text);
-      padding: 7px 28px 7px 9px;
-      border-radius: var(--r-sm);
-      font-size: 13px; outline: none;
-      font-family: inherit;
-      -webkit-appearance: none; appearance: none;
-      transition: border-color .15s, box-shadow .15s;
-      cursor: pointer;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    select:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(27,94,58,.1); }
-
-    input[type=text], input[type=password] {
-      width: 100%;
-      background: var(--bg);
-      border: 1.5px solid var(--border);
-      color: var(--text);
-      padding: 7px 9px;
-      border-radius: var(--r-sm);
-      font-size: 13px; outline: none;
-      font-family: inherit;
-      transition: border-color .15s, box-shadow .15s;
-    }
-    input:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(27,94,58,.1); background: #fff; }
-
-    /* ─── BUTTON ─── */
-    .btn {
-      border: none; border-radius: var(--r-sm);
-      padding: 7px 14px;
-      font-size: 12px; font-weight: 600;
-      cursor: pointer; white-space: nowrap;
-      font-family: inherit; letter-spacing: .01em;
-      transition: transform .1s, filter .1s;
-      flex-shrink: 0;
-    }
-    .btn:active { transform: scale(.97); }
-    .btn-primary { background: var(--green); color: #fff; }
-    .btn-primary:hover { filter: brightness(1.1); }
-    .btn-sm { padding: 6px 12px; font-size: 11.5px; }
-
-    /* ─── CURRENT STRIP ─── */
-    .current-strip {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 7px 13px;
-      background: var(--surface2);
-      border-top: 1px solid var(--border2);
-      font-size: 11.5px;
-    }
-    .current-strip .cs-label { color: var(--muted); }
-    .current-strip .cs-value { color: var(--text); font-weight: 500; max-width: 60%; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-    /* ─── STATUS ROW ─── */
-    .status-row {
-      display: flex; align-items: center; gap: 6px;
-      padding: 8px 13px;
-      border-top: 1px solid var(--border2);
-      background: var(--surface2);
-      font-size: 11.5px;
-    }
-    .pip { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
-    .pip-ok { background: var(--green2); }
-    .pip-err { background: var(--red); }
-    .status-row .sr-label { color: var(--muted); }
-    .status-row .sr-value { color: var(--text); font-weight: 500; margin-left: 2px; }
-
-    /* ─── HINT ─── */
-    .hint { padding: 7px 13px; font-size: 11px; color: var(--muted); border-top: 1px solid var(--border2); line-height: 1.6; }
-
-    /* ─── LINK ROW ─── */
+    /* ── LINK ROW ── */
     a.link-row {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 12px 13px;
-      font-size: 13px; font-weight: 500;
-      color: var(--text); text-decoration: none;
-      transition: background .1s;
+      padding: 13px 14px; font-size: 13.5px; font-weight: 500;
+      color: var(--text); text-decoration: none; transition: background .1s;
+      border-bottom: 1px solid var(--border2);
     }
+    a.link-row:last-child { border-bottom: none; }
     a.link-row:hover { background: var(--surface2); }
-    a.link-row .chevron { color: var(--muted); }
+    a.link-row .chevron { color: var(--text3); font-size: 16px; }
 
-    /* ─── SEARCH ─── */
-    .search-wrap { margin-left: auto; }
-    .search-wrap input {
-      background: var(--bg);
-      border: 1.5px solid var(--border);
-      color: var(--text);
-      padding: 4px 8px;
-      border-radius: var(--r-sm);
-      font-size: 12px; outline: none;
-      font-family: inherit;
-      width: 110px;
-      transition: border-color .15s, box-shadow .15s, width .2s;
+    /* ── WEBHOOK ROW ── */
+    .hook-row {
+      padding: 11px 14px;
+      border-bottom: 1px solid var(--border2);
+      display: flex; flex-direction: column; gap: 7px;
     }
-    .search-wrap input:focus {
-      border-color: var(--green);
-      box-shadow: 0 0 0 3px rgba(27,94,58,.1);
-      background: #fff;
-      width: 150px;
+    .hook-row:last-child { border-bottom: none; }
+    .hook-top { display: flex; align-items: flex-start; gap: 8px; }
+    .hook-url { font-size: 12px; font-family: var(--mono); color: var(--text); flex: 1; word-break: break-all; }
+    .hook-meta { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+    .tag {
+      font-size: 10px; font-family: var(--mono); font-weight: 500;
+      padding: 2px 6px; border-radius: 4px;
+      background: var(--surface3); color: var(--text2); border: 1px solid var(--border);
     }
+    .tag-green { background: var(--green-dim); color: var(--green); border-color: rgba(34,197,94,.2); }
+    .tag-blue  { background: var(--blue-dim);  color: var(--blue);  border-color: rgba(59,130,246,.2); }
 
-    /* ─── COPY BUTTON ─── */
-    .copy-btn {
-      background: none; border: none; cursor: pointer;
-      padding: 4px 6px; border-radius: 5px;
-      color: var(--muted); font-size: 11px;
-      flex-shrink: 0;
-      transition: background .1s, color .1s;
-      font-family: 'SF Mono', 'Fira Code', monospace;
-      letter-spacing: 0;
+    /* ── ADD FORM ── */
+    .add-form {
+      padding: 14px; border-top: 1px solid var(--border);
+      display: flex; flex-direction: column; gap: 10px;
     }
-    .copy-btn:hover { background: var(--surface2); color: var(--text2); }
-    .copy-btn.copied { color: var(--green); }
+    .form-label { font-size: 10px; color: var(--text3); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 4px; }
+    .form-row { display: flex; gap: 8px; }
 
-    /* ─── TOAST ─── */
+    /* ── GROQ STATUS ── */
+    .info-row {
+      display: flex; align-items: center; gap: 7px;
+      padding: 9px 14px; font-size: 12px; color: var(--text2);
+      border-top: 1px solid var(--border2);
+    }
+    .info-pip { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+    /* ── TOAST ── */
     #toast {
       position: fixed; bottom: 20px; left: 50%;
-      transform: translateX(-50%) translateY(6px);
-      background: rgba(26,20,16,.88);
-      backdrop-filter: blur(10px);
-      color: #fff;
-      padding: 7px 16px;
-      border-radius: 20px;
-      font-size: 12px; font-weight: 500;
+      transform: translateX(-50%) translateY(8px);
+      background: var(--surface); border: 1px solid var(--border);
+      color: var(--text); padding: 8px 18px; border-radius: 20px;
+      font-size: 12.5px; font-weight: 500;
       opacity: 0; pointer-events: none;
       transition: opacity .18s, transform .18s;
       white-space: nowrap; z-index: 99;
+      box-shadow: 0 8px 28px rgba(0,0,0,.5);
     }
     #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
   </style>
@@ -409,8 +362,8 @@
       <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.122.554 4.11 1.523 5.832L.044 23.5l5.834-1.53A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.006-1.366l-.36-.213-3.714.975.99-3.623-.234-.374A9.818 9.818 0 012.182 12C2.182 6.578 6.578 2.182 12 2.182S21.818 6.578 21.818 12 17.422 21.818 12 21.818z"/></svg>
     </div>
     <span class="logo-text">Cafofo Zap</span>
-    <div class="conn-pill disconnected" id="conn-pill">
-      <div class="dot"></div>
+    <div class="conn-pill pill-disconnected" id="conn-pill">
+      <div class="conn-dot"></div>
       <span id="conn-label">—</span>
     </div>
   </header>
@@ -418,52 +371,125 @@
   <nav>
     <button class="tab active" data-page="status">Status</button>
     <button class="tab" data-page="grupos">Grupos</button>
-    <button class="tab" data-page="config">Ajustes</button>
+    <button class="tab" data-page="webhooks">Webhooks</button>
+    <button class="tab" data-page="ajustes">Ajustes</button>
   </nav>
 
   <main>
 
-    <!-- ── STATUS ── -->
+    <!-- STATUS -->
     <div class="page active" id="page-status">
-      <div id="status-banner" class="disconnected">
-        <div class="s-orb">
-          <svg id="s-icon" viewBox="0 0 24 24"><path id="s-icon-path" d=""/></svg>
+      <div class="status-ring-wrap">
+        <div class="status-ring ring-disconnected" id="status-ring">
+          <svg class="ring-svg" viewBox="0 0 84 84">
+            <circle class="ring-bg" cx="42" cy="42" r="36"/>
+            <circle class="ring-arc" id="ring-arc" cx="42" cy="42" r="36"/>
+          </svg>
+          <div class="ring-icon">
+            <svg viewBox="0 0 24 24">
+              <path id="ring-icon-path" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+            </svg>
+          </div>
         </div>
-        <div class="s-info">
-          <div class="s-label" id="s-label">—</div>
-          <div class="s-sub" id="s-sub"></div>
-        </div>
+        <div class="status-label disconnected" id="status-label">Desconectado</div>
+        <div class="status-sub" id="status-sub">Sem conexão com o WhatsApp</div>
       </div>
-
-      <div id="qr-card">
-        <img id="qr" src="" alt="QR Code">
-        <p>Abra o WhatsApp → Menu → Dispositivos vinculados → Vincular dispositivo</p>
+      <div class="qr-card" id="qr-card">
+        <img id="qr-img" src="" alt="QR Code">
+        <p class="qr-hint">Abra o WhatsApp → Menu → Dispositivos vinculados → Vincular dispositivo</p>
       </div>
     </div>
 
-    <!-- ── GRUPOS ── -->
+    <!-- GRUPOS -->
     <div class="page" id="page-grupos">
       <div class="card">
         <div class="card-head">
-          <div class="ci ci-g">
+          <div class="card-icon ci-green">
             <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
           </div>
           <span class="card-title" id="grupos-title">Grupos</span>
-          <div class="search-wrap">
-            <input type="text" id="grupos-search" placeholder="Buscar…" autocomplete="off">
-          </div>
+          <input type="text" class="search-input" id="grupos-search" placeholder="Buscar…" autocomplete="off">
         </div>
-        <div id="grupos-list"><div class="card-empty">Conecte o WhatsApp para listar os grupos</div></div>
+        <div id="grupos-list">
+          <div class="card-empty">Conecte o WhatsApp para listar os grupos</div>
+        </div>
       </div>
     </div>
 
-    <!-- ── AJUSTES ── -->
-    <div class="page" id="page-config">
+    <!-- WEBHOOKS -->
+    <div class="page" id="page-webhooks">
+      <div class="card">
+        <div class="card-head">
+          <div class="card-icon ci-blue">
+            <svg viewBox="0 0 24 24"><path d="M10.59 13.41c.41.39.41 1.03 0 1.42-.39.39-1.02.39-1.41 0a5.003 5.003 0 010-7.07l3.54-3.54a5.003 5.003 0 017.07 0 5.003 5.003 0 010 7.07l-1.49 1.49c.01-.36-.04-.72-.11-1.05l.78-.79a3.007 3.007 0 000-4.24 3.007 3.007 0 00-4.24 0l-3.53 3.53a3.007 3.007 0 000 4.24zm-2.18 1.18a5.003 5.003 0 000 7.07 5.003 5.003 0 007.07 0l1.49-1.49c-.01.36.04.72.11 1.05l-.78.79a3.007 3.007 0 000 4.24 3.007 3.007 0 004.24 0l3.53-3.53a3.007 3.007 0 000-4.24 3.007 3.007 0 00-4.24 0l-.35.34c-.22-.07-.46-.11-.71-.11-.36 0-.71.09-1.02.25l.78-.79a5.003 5.003 0 00-7.07 0z"/></svg>
+          </div>
+          <span class="card-title">Webhooks</span>
+          <span class="card-count" id="hooks-count"></span>
+        </div>
+        <div id="hooks-list">
+          <div class="card-empty">Nenhum webhook registrado</div>
+        </div>
+        <div class="add-form">
+          <div>
+            <div class="form-label">URL</div>
+            <input type="url" id="hook-url" placeholder="https://…" autocomplete="off">
+          </div>
+          <div class="form-row">
+            <div style="flex:1">
+              <div class="form-label">Grupo</div>
+              <select id="hook-group">
+                <option value="">Todos os grupos</option>
+              </select>
+            </div>
+            <div style="flex:1">
+              <div class="form-label">Eventos</div>
+              <select id="hook-events">
+                <option value="text,audio">text + audio</option>
+                <option value="text">text</option>
+                <option value="audio">audio</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text2);flex:1;cursor:pointer">
+              <div class="toggle">
+                <input type="checkbox" id="hook-transcribe">
+                <span class="slider"></span>
+              </div>
+              Transcrever áudio
+            </label>
+            <button class="btn btn-primary btn-sm" id="hook-add-btn" onclick="addWebhook()">Adicionar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AJUSTES -->
+    <div class="page" id="page-ajustes">
 
       <div class="card">
         <div class="card-head">
-          <div class="ci ci-g">
-            <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+          <div class="card-icon ci-amber">
+            <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
+          </div>
+          <span class="card-title">Groq API Key</span>
+        </div>
+        <div class="field">
+          <div class="field-row">
+            <input type="password" id="groq-key-input" placeholder="gsk_…" autocomplete="off">
+            <button class="btn btn-primary btn-sm" onclick="saveGroqKey()" style="flex-shrink:0">Salvar</button>
+          </div>
+        </div>
+        <div class="info-row" id="groq-status">
+          <div class="info-pip" style="background:var(--text3)"></div>
+          <span>Verificando…</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="card-icon ci-green">
+            <svg viewBox="0 0 24 24"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/></svg>
           </div>
           <span class="card-title">Ferramentas</span>
         </div>
@@ -471,6 +497,9 @@
           Logs em tempo real
           <span class="chevron">›</span>
         </a>
+        <div style="padding:12px 14px;border-top:1px solid var(--border2)">
+          <button class="btn btn-danger btn-sm" onclick="disconnect()">Desconectar WhatsApp</button>
+        </div>
       </div>
 
     </div>
@@ -481,27 +510,29 @@
 <div id="toast"></div>
 
 <script>
-  const IC = {
+  const ICONS = {
     check: 'M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z',
     spin:  'M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z',
     disc:  'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z',
   };
-  const LABELS = { connected: 'Conectado', connecting: 'Conectando', disconnected: 'Desconectado' };
-  const SUBS   = { connected: 'WhatsApp ativo e funcionando', connecting: 'Aguardando leitura do QR Code…', disconnected: 'Sem conexão com o WhatsApp' };
+  const LABELS = { connected: 'Conectado', connecting: 'Conectando…', disconnected: 'Desconectado' };
+  const SUBS   = { connected: 'WhatsApp ativo e funcionando', connecting: 'Aguardando leitura do QR Code', disconnected: 'Sem conexão com o WhatsApp' };
+  const PALETTE = ['#22C55E','#3B82F6','#A855F7','#F59E0B','#06B6D4','#EF4444','#F97316','#10B981','#6366F1','#EC4899'];
 
-  // ── Nav ──
-  document.querySelectorAll('.tab').forEach(btn => {
-    btn.onclick = () => {
-      document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-      btn.classList.add('active');
-      document.getElementById('page-' + btn.dataset.page).classList.add('active');
-      if (btn.dataset.page === 'grupos' && !gruposCache.length) loadGrupos();
-    };
-  });
+  let lastStatus = null;
+  let gruposCache = [];
+  let hooksCache = [];
 
-  // ── Avatar ──
-  const PALETTE = ['#2563EB','#7C3AED','#DB2777','#D97706','#0891B2','#059669','#EA580C','#4F46E5','#0D9488','#DC2626'];
+  // Toast
+  let toastTimer;
+  function toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg; el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
+  }
+
+  // Avatar
   function avatarColor(name) {
     let h = 0; for (const c of name) h = (h * 31 + c.charCodeAt(0)) >>> 0;
     return PALETTE[h % PALETTE.length];
@@ -510,11 +541,53 @@
     return name.split(/\s+/).slice(0,2).map(w=>w[0]||'').join('').toUpperCase() || '?';
   }
 
-  // ── State ──
-  let lastStatus = null;
-  let gruposCache = [];
+  // Nav
+  document.querySelectorAll('.tab').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('page-' + btn.dataset.page).classList.add('active');
+      if (btn.dataset.page === 'grupos' && !gruposCache.length) loadGrupos();
+      if (btn.dataset.page === 'webhooks') loadWebhooks();
+      if (btn.dataset.page === 'ajustes') loadGroqStatus();
+    };
+  });
 
-  // ── Grupos ──
+  // Status
+  async function refresh() {
+    const data = await fetch('/status').then(r=>r.json()).catch(()=>({status:'disconnected'}));
+    const s = data.status;
+
+    const pill = document.getElementById('conn-pill');
+    pill.className = 'conn-pill pill-' + s;
+    document.getElementById('conn-label').textContent = LABELS[s] || s;
+
+    const ring = document.getElementById('status-ring');
+    ring.className = 'status-ring ring-' + s;
+    document.getElementById('ring-icon-path').setAttribute('d', ICONS[s==='connected'?'check':s==='connecting'?'spin':'disc']);
+
+    const lbl = document.getElementById('status-label');
+    lbl.className = 'status-label ' + s;
+    lbl.textContent = LABELS[s] || s;
+    document.getElementById('status-sub').textContent = SUBS[s] || '';
+
+    const qr = document.getElementById('qr-card');
+    if (data.qr) {
+      document.getElementById('qr-img').src = data.qr;
+      qr.classList.add('show');
+    } else {
+      qr.classList.remove('show');
+    }
+
+    if (s === 'connected' && lastStatus !== 'connected') {
+      loadGrupos();
+      populateGroupSelect();
+    }
+    lastStatus = s;
+  }
+
+  // Grupos
   async function loadGrupos() {
     const list = await fetch('/groups').then(r=>r.json()).catch(()=>[]);
     gruposCache = list;
@@ -524,8 +597,8 @@
   function renderGrupos(filter) {
     const q = (filter ?? document.getElementById('grupos-search').value).toLowerCase().trim();
     const filtered = q ? gruposCache.filter(g => g.name.toLowerCase().includes(q)) : gruposCache;
-    const title = document.getElementById('grupos-title');
-    title.textContent = q ? `${filtered.length} resultado${filtered.length !== 1 ? 's' : ''}` : `Grupos (${gruposCache.length})`;
+    document.getElementById('grupos-title').textContent =
+      q ? `${filtered.length} resultado${filtered.length!==1?'s':''}` : `Grupos (${gruposCache.length})`;
     const el = document.getElementById('grupos-list');
     el.innerHTML = '';
     if (!filtered.length) {
@@ -541,12 +614,11 @@
           <div class="row-name">${g.name}</div>
           <div class="row-sub">${g.id}</div>
         </div>
-        <button class="copy-btn" title="Copiar ID">ID</button>`;
+        <button class="copy-btn">ID</button>`;
       const btn = row.querySelector('.copy-btn');
       btn.onclick = () => {
         navigator.clipboard.writeText(g.id).then(() => {
-          btn.textContent = '✓';
-          btn.classList.add('copied');
+          btn.textContent = '✓'; btn.classList.add('copied');
           setTimeout(() => { btn.textContent = 'ID'; btn.classList.remove('copied'); }, 1500);
         });
       };
@@ -556,45 +628,120 @@
 
   document.getElementById('grupos-search').addEventListener('input', e => renderGrupos(e.target.value));
 
-  // ── Status ──
-  async function refresh() {
-    const data = await fetch('/status').then(r=>r.json()).catch(()=>({status:'disconnected'}));
-    const s = data.status;
+  // Webhooks
+  async function loadWebhooks() {
+    const list = await fetch('/webhooks').then(r=>r.json()).catch(()=>[]);
+    hooksCache = list;
+    renderWebhooks();
+  }
 
-    const pill = document.getElementById('conn-pill');
-    pill.className = 'conn-pill ' + s;
-    document.getElementById('conn-label').textContent = LABELS[s] || s;
-
-    const banner = document.getElementById('status-banner');
-    banner.className = s;
-    document.getElementById('s-icon-path').setAttribute('d', s==='connected'?IC.check:s==='connecting'?IC.spin:IC.disc);
-    document.getElementById('s-label').textContent = LABELS[s] || s;
-    document.getElementById('s-sub').textContent = SUBS[s] || '';
-
-    const qr = document.getElementById('qr-card');
-    if (data.qr) {
-      document.getElementById('qr').src = data.qr;
-      qr.classList.add('show');
-    } else {
-      qr.classList.remove('show');
+  function renderWebhooks() {
+    document.getElementById('hooks-count').textContent = hooksCache.length || '';
+    const el = document.getElementById('hooks-list');
+    el.innerHTML = '';
+    if (!hooksCache.length) {
+      el.innerHTML = '<div class="card-empty">Nenhum webhook registrado</div>';
+      return;
     }
-
-    if (s === 'connected' && lastStatus !== 'connected') loadGrupos();
-    lastStatus = s;
+    hooksCache.forEach(h => {
+      const div = document.createElement('div');
+      div.className = 'hook-row';
+      const events = Array.isArray(h.events) ? h.events : (h.events||'').split(',');
+      const groupName = gruposCache.find(g=>g.id===h.group_id)?.name || h.group_id || 'todos';
+      div.innerHTML = `
+        <div class="hook-top">
+          <div class="hook-url">${h.url}</div>
+          <button class="icon-btn" title="Remover">
+            <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+          </button>
+        </div>
+        <div class="hook-meta">
+          <span class="tag">${groupName}</span>
+          ${events.map(e => `<span class="tag tag-blue">${e}</span>`).join('')}
+          ${h.transcribe ? '<span class="tag tag-green">transcribe</span>' : ''}
+        </div>`;
+      div.querySelector('.icon-btn').onclick = () => removeWebhook(h.id);
+      el.appendChild(div);
+    });
   }
 
-  // ── Toast ──
-  let toastTimer;
-  function toast(msg) {
-    const el = document.getElementById('toast');
-    el.textContent = msg; el.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
+  async function addWebhook() {
+    const url = document.getElementById('hook-url').value.trim();
+    if (!url) { toast('URL obrigatória'); return; }
+    const groupId  = document.getElementById('hook-group').value;
+    const events   = document.getElementById('hook-events').value;
+    const transcribe = document.getElementById('hook-transcribe').checked;
+    const btn = document.getElementById('hook-add-btn');
+    btn.disabled = true; btn.textContent = '…';
+    try {
+      const res = await fetch('/webhooks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url, groupId: groupId || undefined, events: events.split(','), transcribe }),
+      });
+      if (!res.ok) throw new Error();
+      document.getElementById('hook-url').value = '';
+      document.getElementById('hook-transcribe').checked = false;
+      await loadWebhooks();
+      toast('Webhook adicionado');
+    } catch { toast('Erro ao adicionar webhook'); }
+    btn.disabled = false; btn.textContent = 'Adicionar';
   }
 
-  // ── Init ──
+  async function removeWebhook(id) {
+    await fetch(`/webhooks/${id}`, { method: 'DELETE' });
+    await loadWebhooks();
+    toast('Webhook removido');
+  }
+
+  async function populateGroupSelect() {
+    if (!gruposCache.length) {
+      const list = await fetch('/groups').then(r=>r.json()).catch(()=>[]);
+      gruposCache = list;
+    }
+    const sel = document.getElementById('hook-group');
+    sel.innerHTML = '<option value="">Todos os grupos</option>';
+    gruposCache.forEach(g => {
+      const opt = document.createElement('option');
+      opt.value = g.id; opt.textContent = g.name;
+      sel.appendChild(opt);
+    });
+  }
+
+  // Groq
+  async function loadGroqStatus() {
+    const data = await fetch('/config/groq-key').then(r=>r.json()).catch(()=>({set:false}));
+    const el = document.getElementById('groq-status');
+    el.innerHTML = data.set
+      ? `<div class="info-pip" style="background:var(--green)"></div><span>Chave configurada</span>`
+      : `<div class="info-pip" style="background:var(--red)"></div><span>Chave não configurada</span>`;
+  }
+
+  async function saveGroqKey() {
+    const key = document.getElementById('groq-key-input').value.trim();
+    await fetch('/config/groq-key', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key: key || null }),
+    });
+    document.getElementById('groq-key-input').value = '';
+    await loadGroqStatus();
+    toast(key ? 'Chave salva' : 'Chave removida');
+  }
+
+  // Disconnect
+  async function disconnect() {
+    if (!confirm('Desconectar o WhatsApp?')) return;
+    await fetch('/disconnect', { method: 'POST' });
+    toast('Desconectado');
+    refresh();
+  }
+
+  // Init
   refresh();
   setInterval(refresh, 3000);
+  populateGroupSelect();
+  loadWebhooks();
 </script>
 </body>
 </html>
