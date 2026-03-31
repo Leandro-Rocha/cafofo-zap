@@ -86,6 +86,20 @@ app.post('/config/groq-key', (req, res) => {
 
 app.get('/health', (_, res) => res.json({ ok: true }));
 
+app.post('/transcribe/compare', async (req, res) => {
+  const { audioBase64, mimetype } = req.body;
+  if (!audioBase64) return res.status(400).json({ error: 'audioBase64 obrigatório' });
+  const { compareTranscriptions } = require('./transcribe');
+  try {
+    const results = await compareTranscriptions(Buffer.from(audioBase64, 'base64'), mimetype);
+    res.json(results);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/transcribe/compare', (_, res) => res.sendFile(path.join(__dirname, 'compare.html')));
+
 app.get('/logs/history', (_, res) => res.json(logger.getLines()));
 
 app.get('/logs/stream', (req, res) => {

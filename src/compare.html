@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Comparar modelos Whisper</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #f5f5f5; color: #222; padding: 2rem; }
+    h1 { font-size: 1.3rem; margin-bottom: 1.5rem; }
+    .upload { background: #fff; border: 2px dashed #ccc; border-radius: 8px; padding: 2rem; text-align: center; cursor: pointer; transition: border-color .2s; }
+    .upload:hover, .upload.drag { border-color: #555; }
+    .upload input { display: none; }
+    .upload label { cursor: pointer; font-size: 1rem; color: #555; }
+    .upload .filename { margin-top: .5rem; font-size: .85rem; color: #888; }
+    button { margin-top: 1rem; padding: .6rem 1.4rem; background: #222; color: #fff; border: none; border-radius: 6px; font-size: 1rem; cursor: pointer; }
+    button:disabled { opacity: .4; cursor: default; }
+    .spinner { display: none; margin-top: 1.5rem; text-align: center; color: #666; }
+    .results { margin-top: 1.5rem; display: flex; flex-direction: column; gap: .75rem; }
+    .card { background: #fff; border-radius: 8px; padding: 1rem 1.2rem; border: 1px solid #e0e0e0; }
+    .card .label { font-size: .75rem; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: .04em; margin-bottom: .4rem; }
+    .card .text { font-size: 1rem; line-height: 1.5; }
+    .card .text.error { color: #c00; font-size: .9rem; }
+    .card .text.empty { color: #aaa; font-style: italic; }
+  </style>
+</head>
+<body>
+  <h1>Comparar modelos Whisper</h1>
+
+  <div class="upload" id="dropzone">
+    <input type="file" id="fileInput" accept="audio/*">
+    <label for="fileInput">Clique ou arraste um arquivo de áudio</label>
+    <div class="filename" id="filename"></div>
+  </div>
+  <button id="btn" disabled>Comparar</button>
+
+  <div class="spinner" id="spinner">Transcrevendo com 5 variantes... aguarde</div>
+  <div class="results" id="results"></div>
+
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const btn = document.getElementById('btn');
+    const filenameEl = document.getElementById('filename');
+    const spinner = document.getElementById('spinner');
+    const resultsEl = document.getElementById('results');
+    const dropzone = document.getElementById('dropzone');
+
+    let selectedFile = null;
+
+    fileInput.addEventListener('change', () => setFile(fileInput.files[0]));
+
+    dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('drag'); });
+    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag'));
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('drag');
+      setFile(e.dataTransfer.files[0]);
+    });
+
+    function setFile(file) {
+      if (!file) return;
+      selectedFile = file;
+      filenameEl.textContent = file.name;
+      btn.disabled = false;
+    }
+
+    btn.addEventListener('click', async () => {
+      if (!selectedFile) return;
+      btn.disabled = true;
+      resultsEl.innerHTML = '';
+      spinner.style.display = 'block';
+
+      try {
+        const arrayBuffer = await selectedFile.arrayBuffer();
+        const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+
+        const res = await fetch('/transcribe/compare', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ audioBase64: base64, mimetype: selectedFile.type }),
+        });
+
+        const data = await res.json();
+        spinner.style.display = 'none';
+
+        if (!Array.isArray(data)) {
+          resultsEl.innerHTML = `<div class="card"><div class="text error">${data.error || 'Erro desconhecido'}</div></div>`;
+          return;
+        }
+
+        resultsEl.innerHTML = data.map((r) => `
+          <div class="card">
+            <div class="label">${r.label}</div>
+            <div class="text ${r.error ? 'error' : r.transcription ? '' : 'empty'}">
+              ${r.error ? r.error : r.transcription || '(sem resultado)'}
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        spinner.style.display = 'none';
+        resultsEl.innerHTML = `<div class="card"><div class="text error">${err.message}</div></div>`;
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
