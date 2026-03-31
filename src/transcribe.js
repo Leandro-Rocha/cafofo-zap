@@ -11,7 +11,7 @@ async function transcribeAudio(buffer, mimetype, { attempt = 1, maxAttempts = 4 
   const ext = (mimetype || '').includes('ogg') ? 'ogg' : 'mp4';
   const form = new FormData();
   form.append('file', new Blob([buffer], { type: mimetype || 'audio/ogg' }), `audio.${ext}`);
-  form.append('model', 'whisper-large-v3');
+  form.append('model', 'whisper-large-v3-turbo');
   form.append('language', 'pt');
   form.append('response_format', 'text');
 
