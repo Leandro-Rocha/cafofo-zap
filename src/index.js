@@ -98,6 +98,17 @@ app.post('/transcribe/compare', async (req, res) => {
   }
 });
 
+app.get('/config/whisper-prompt', (_, res) => {
+  const { getWhisperPrompt } = require('./transcribe');
+  res.json({ prompt: getWhisperPrompt() });
+});
+
+app.post('/config/whisper-prompt', (req, res) => {
+  const { setWhisperPrompt } = require('./transcribe');
+  setWhisperPrompt(req.body.prompt || null);
+  res.json({ ok: true });
+});
+
 app.get('/transcribe/compare', (_, res) => res.sendFile(path.join(__dirname, 'compare.html')));
 
 app.get('/logs/history', (_, res) => res.json(logger.getLines()));

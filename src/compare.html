@@ -6,67 +6,102 @@
   <title>Comparar modelos Whisper</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: system-ui, sans-serif; background: #f5f5f5; color: #222; padding: 2rem; }
+    body { font-family: system-ui, sans-serif; background: #f5f5f5; color: #222; padding: 2rem; max-width: 800px; }
     h1 { font-size: 1.3rem; margin-bottom: 1.5rem; }
-    .upload { background: #fff; border: 2px dashed #ccc; border-radius: 8px; padding: 2rem; text-align: center; cursor: pointer; transition: border-color .2s; }
-    .upload:hover, .upload.drag { border-color: #555; }
-    .upload input { display: none; }
-    .upload label { cursor: pointer; font-size: 1rem; color: #555; }
-    .upload .filename { margin-top: .5rem; font-size: .85rem; color: #888; }
-    button { margin-top: 1rem; padding: .6rem 1.4rem; background: #222; color: #fff; border: none; border-radius: 6px; font-size: 1rem; cursor: pointer; }
+    h2 { font-size: .95rem; font-weight: 600; margin-bottom: .5rem; color: #444; }
+    section { background: #fff; border-radius: 8px; padding: 1.2rem; border: 1px solid #e0e0e0; margin-bottom: 1rem; }
+    textarea { width: 100%; min-height: 80px; font-size: .85rem; font-family: inherit; border: 1px solid #ccc; border-radius: 6px; padding: .5rem .7rem; resize: vertical; line-height: 1.5; }
+    .row { display: flex; gap: .5rem; margin-top: .5rem; align-items: center; }
+    .hint { font-size: .75rem; color: #888; flex: 1; }
+    .upload-area { border: 2px dashed #ccc; border-radius: 8px; padding: 1.5rem; text-align: center; cursor: pointer; transition: border-color .2s; }
+    .upload-area:hover, .upload-area.drag { border-color: #555; }
+    .upload-area input { display: none; }
+    .upload-area label { cursor: pointer; color: #555; }
+    .filename { margin-top: .4rem; font-size: .8rem; color: #888; }
+    button { padding: .5rem 1.2rem; background: #222; color: #fff; border: none; border-radius: 6px; font-size: .9rem; cursor: pointer; white-space: nowrap; }
     button:disabled { opacity: .4; cursor: default; }
-    .spinner { display: none; margin-top: 1.5rem; text-align: center; color: #666; }
-    .results { margin-top: 1.5rem; display: flex; flex-direction: column; gap: .75rem; }
-    .card { background: #fff; border-radius: 8px; padding: 1rem 1.2rem; border: 1px solid #e0e0e0; }
-    .card .label { font-size: .75rem; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: .04em; margin-bottom: .4rem; }
-    .card .text { font-size: 1rem; line-height: 1.5; }
-    .card .text.error { color: #c00; font-size: .9rem; }
+    button.secondary { background: #fff; color: #222; border: 1px solid #ccc; }
+    .spinner { display: none; text-align: center; color: #666; padding: 1rem; font-size: .9rem; }
+    .results { display: flex; flex-direction: column; gap: .6rem; margin-top: .5rem; }
+    .card { border-radius: 6px; padding: .8rem 1rem; border: 1px solid #e0e0e0; background: #fafafa; }
+    .card.best { border-color: #22c55e; background: #f0fdf4; }
+    .card .label { font-size: .7rem; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .04em; margin-bottom: .3rem; }
+    .card .text { font-size: .95rem; line-height: 1.5; }
+    .card .text.error { color: #c00; font-size: .85rem; }
     .card .text.empty { color: #aaa; font-style: italic; }
+    .saved-badge { font-size: .75rem; color: #16a34a; margin-left: .5rem; display: none; }
   </style>
 </head>
 <body>
   <h1>Comparar modelos Whisper</h1>
 
-  <div class="upload" id="dropzone">
-    <input type="file" id="fileInput" accept="audio/*">
-    <label for="fileInput">Clique ou arraste um arquivo de áudio</label>
-    <div class="filename" id="filename"></div>
-  </div>
-  <button id="btn" disabled>Comparar</button>
+  <section>
+    <h2>Prompt de vocabulário <span class="saved-badge" id="savedBadge">✓ salvo</span></h2>
+    <textarea id="promptInput" placeholder="Exemplos de itens do seu mercado..."></textarea>
+    <div class="row">
+      <span class="hint">Este prompt é usado na transcrição real. Inclua itens, marcas e variedades que você costuma falar.</span>
+      <button class="secondary" id="savePromptBtn">Salvar</button>
+    </div>
+  </section>
 
-  <div class="spinner" id="spinner">Transcrevendo com 5 variantes... aguarde</div>
+  <section>
+    <h2>Áudio para testar</h2>
+    <div class="upload-area" id="dropzone">
+      <input type="file" id="fileInput" accept="audio/*">
+      <label for="fileInput">Clique ou arraste um arquivo de áudio</label>
+      <div class="filename" id="filename"></div>
+    </div>
+    <div class="row" style="margin-top:.8rem">
+      <button id="compareBtn" disabled>Comparar 5 variantes</button>
+    </div>
+  </section>
+
+  <div class="spinner" id="spinner">Transcrevendo com 5 variantes em paralelo... aguarde</div>
   <div class="results" id="results"></div>
 
   <script>
     const fileInput = document.getElementById('fileInput');
-    const btn = document.getElementById('btn');
+    const compareBtn = document.getElementById('compareBtn');
     const filenameEl = document.getElementById('filename');
     const spinner = document.getElementById('spinner');
     const resultsEl = document.getElementById('results');
     const dropzone = document.getElementById('dropzone');
+    const promptInput = document.getElementById('promptInput');
+    const savePromptBtn = document.getElementById('savePromptBtn');
+    const savedBadge = document.getElementById('savedBadge');
 
     let selectedFile = null;
 
-    fileInput.addEventListener('change', () => setFile(fileInput.files[0]));
+    // Load current prompt
+    fetch('/config/whisper-prompt').then(r => r.json()).then(d => { promptInput.value = d.prompt || ''; });
 
+    savePromptBtn.addEventListener('click', async () => {
+      savePromptBtn.disabled = true;
+      await fetch('/config/whisper-prompt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: promptInput.value.trim() || null }),
+      });
+      savePromptBtn.disabled = false;
+      savedBadge.style.display = 'inline';
+      setTimeout(() => savedBadge.style.display = 'none', 2000);
+    });
+
+    fileInput.addEventListener('change', () => setFile(fileInput.files[0]));
     dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('drag'); });
     dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag'));
-    dropzone.addEventListener('drop', (e) => {
-      e.preventDefault();
-      dropzone.classList.remove('drag');
-      setFile(e.dataTransfer.files[0]);
-    });
+    dropzone.addEventListener('drop', (e) => { e.preventDefault(); dropzone.classList.remove('drag'); setFile(e.dataTransfer.files[0]); });
 
     function setFile(file) {
       if (!file) return;
       selectedFile = file;
       filenameEl.textContent = file.name;
-      btn.disabled = false;
+      compareBtn.disabled = false;
     }
 
-    btn.addEventListener('click', async () => {
+    compareBtn.addEventListener('click', async () => {
       if (!selectedFile) return;
-      btn.disabled = true;
+      compareBtn.disabled = true;
       resultsEl.innerHTML = '';
       spinner.style.display = 'block';
 
@@ -88,9 +123,9 @@
           return;
         }
 
-        resultsEl.innerHTML = data.map((r) => `
-          <div class="card">
-            <div class="label">${r.label}</div>
+        resultsEl.innerHTML = data.map((r, i) => `
+          <div class="card ${i === 1 ? 'best' : ''}">
+            <div class="label">${r.label}${i === 1 ? ' — usado na produção' : ''}</div>
             <div class="text ${r.error ? 'error' : r.transcription ? '' : 'empty'}">
               ${r.error ? r.error : r.transcription || '(sem resultado)'}
             </div>
@@ -100,7 +135,7 @@
         spinner.style.display = 'none';
         resultsEl.innerHTML = `<div class="card"><div class="text error">${err.message}</div></div>`;
       } finally {
-        btn.disabled = false;
+        compareBtn.disabled = false;
       }
     });
   </script>
